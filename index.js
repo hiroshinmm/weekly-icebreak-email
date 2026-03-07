@@ -41,7 +41,7 @@ async function generateInsight(topic) {
         const genAI = new GoogleGenerativeAI(apiKey);
         // 現在有効な標準モデル名を使用し、JSONモードとSchemaを強制
         let model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash-latest",
+            model: "gemini-2.0-flash",
             generationConfig: {
                 responseMimeType: "application/json",
                 responseSchema: schema
@@ -72,7 +72,7 @@ async function generateInsight(topic) {
         } catch (e) {
             console.warn('Fallback to Pro model due to error:', e.message);
             model = genAI.getGenerativeModel({
-                model: "gemini-1.5-pro-latest",
+                model: "gemini-1.5-pro",
                 generationConfig: {
                     responseMimeType: "application/json",
                     responseSchema: schema
