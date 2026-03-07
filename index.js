@@ -461,46 +461,79 @@ async function sendEmail(attachments, topics) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Weekly Ice Break Slides</title>
         <style>
-            :root { --bg: #f8fafc; --text: #1e293b; --accent: #003399; }
-            body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg); color: var(--text); padding: 40px; display: flex; flex-direction: column; align-items: center; }
-            header { text-align: center; margin-bottom: 60px; }
-            h1 { font-size: 2.5rem; color: var(--accent); margin-bottom: 10px; }
-            .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 40px; width: 100%; max-width: 1400px; }
-            .slide-card { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-            .slide-card img { width: 100%; height: auto; display: block; border-bottom: 1px solid #e2e8f0; }
-            .slide-info { padding: 30px; font-size: 16px; line-height: 1.6; }
-            .slide-info a { color: var(--accent); text-decoration: none; font-size: 1.2rem; font-weight: bold; display: block; margin-bottom: 20px;}
-            .slide-info a:hover { text-decoration: underline; }
-            .slide-tag { display: inline-block; font-size: 12px; background: var(--accent); color: white; padding: 6px 12px; border-radius: 6px; margin-bottom: 16px; font-weight: bold;}
-            .insight-box { background: #f1f5f9; border-left: 4px solid var(--accent); padding: 20px; border-radius: 0 8px 8px 0; margin-top: 20px; }
-            .insight-label { font-size: 12px; font-weight: bold; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; }
-            .insight-text { font-size: 15px; color: #334155; margin: 0; }
+            :root { --accent: #003399; --bg: #f0f4ff; }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body { font-family: -apple-system, 'Noto Sans JP', sans-serif; background: var(--bg); padding: 20px; }
+            header { text-align: center; padding: 40px 20px; }
+            h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); color: var(--accent); }
+            header p { color: #64748b; margin-top: 8px; }
+            .cards { display: flex; flex-direction: column; gap: 32px; max-width: 780px; margin: 0 auto; }
+            .card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+            .card-body { padding: 24px; }
+            .tag { display: inline-block; background: var(--accent); color: #fff; font-size: 12px; font-weight: bold; padding: 4px 12px; border-radius: 6px; margin-bottom: 14px; letter-spacing: 0.05em; }
+            .card-title { font-size: clamp(1rem, 3vw, 1.3rem); font-weight: bold; color: #0f172a; line-height: 1.4; margin-bottom: 12px; }
+            .card-title a { color: inherit; text-decoration: none; }
+            .card-title a:hover { text-decoration: underline; }
+            .card-snippet { font-size: 14px; line-height: 1.7; color: #475569; margin-bottom: 16px; }
+            .insight-box { background: #f1f5f9; border-left: 4px solid var(--accent); padding: 16px 20px; border-radius: 0 10px 10px 0; }
+            .insight-label { font-size: 11px; font-weight: bold; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 6px; }
+            .insight-text { font-size: 14px; line-height: 1.7; color: #334155; }
+            .slide-img-wrap { padding: 0 0 0 0; cursor: zoom-in; }
+            .slide-img-wrap img { width: 100%; height: auto; display: block; border-top: 1px solid #e2e8f0; }
+            /* ライトボックス */
+            #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
+            #lightbox.open { display: flex; }
+            #lightbox img { max-width: 100%; max-height: 90vh; border-radius: 12px; object-fit: contain; }
+            #lightbox-close { position: fixed; top: 16px; right: 16px; background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 28px; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         </style>
     </head>
     <body>
         <header>
             <h1>Weekly Ice Break Trends</h1>
-            <p>エンジニアのための最新テックトレンド・スライド</p>
+            <p>エンジニアのための最新テックトレンド</p>
         </header>
 
-        <div class="grid" id="slide-grid">
+        <div class="cards">
             ${topics.map((t, i) => `
-            <div class="slide-card">
-                <img src="output/icebreak_slide_${i}.png" alt="Slide ${i}">
-                <div class="slide-info">
-                    <div class="slide-tag">${t.tag}</div>
-                    <a href="${t.link}" target="_blank" rel="noopener noreferrer">🔗 ${t.title}</a>
+            <div class="card">
+                <div class="card-body">
+                    <div class="tag">${t.tag}</div>
+                    <div class="card-title"><a href="${t.link}" target="_blank" rel="noopener noreferrer">${t.title}</a></div>
+                    <div class="card-snippet">${t.snippet}</div>
                     <div class="insight-box">
-                        <div class="insight-label">Insight</div>
-                        <p class="insight-text">${t.insight}</p>
+                        <div class="insight-label">💡 INSIGHT</div>
+                        <div class="insight-text">${t.insight}</div>
                     </div>
+                </div>
+                <div class="slide-img-wrap" onclick="openLightbox('output/icebreak_slide_${i}.png')">
+                    <img src="output/icebreak_slide_${i}.png" alt="${t.title}" loading="lazy">
                 </div>
             </div>
             `).join('')}
         </div>
+
+        <!-- ライトボックス -->
+        <div id="lightbox" onclick="closeLightbox()">
+            <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+            <img id="lightbox-img" src="" alt="slide">
+        </div>
+
+        <script>
+            function openLightbox(src) {
+                document.getElementById('lightbox-img').src = src;
+                document.getElementById('lightbox').classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeLightbox() {
+                document.getElementById('lightbox').classList.remove('open');
+                document.body.style.overflow = '';
+            }
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+        </script>
     </body>
     </html>
     `;
+
     fs.writeFileSync(path.join(docsDir, 'index.html'), indexHtml);
     console.log('docs/index.html generated successfully.');
 
