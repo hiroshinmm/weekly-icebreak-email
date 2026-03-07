@@ -6,91 +6,135 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Weekly Ice Break Slides</title>
         <style>
-            :root { --bg: #f8fafc; --text: #1e293b; --accent: #003399; }
-            body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg); color: var(--text); padding: 40px; display: flex; flex-direction: column; align-items: center; }
-            header { text-align: center; margin-bottom: 60px; }
-            h1 { font-size: 2.5rem; color: var(--accent); margin-bottom: 10px; }
-            .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 40px; width: 100%; max-width: 1400px; }
-            .slide-card { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-            .slide-card img { width: 100%; height: auto; display: block; border-bottom: 1px solid #e2e8f0; }
-            .slide-info { padding: 30px; font-size: 16px; line-height: 1.6; }
-            .slide-info a { color: var(--accent); text-decoration: none; font-size: 1.2rem; font-weight: bold; display: block; margin-bottom: 20px;}
-            .slide-info a:hover { text-decoration: underline; }
-            .slide-tag { display: inline-block; font-size: 12px; background: var(--accent); color: white; padding: 6px 12px; border-radius: 6px; margin-bottom: 16px; font-weight: bold;}
-            .insight-box { background: #f1f5f9; border-left: 4px solid var(--accent); padding: 20px; border-radius: 0 8px 8px 0; margin-top: 20px; }
-            .insight-label { font-size: 12px; font-weight: bold; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; }
-            .insight-text { font-size: 15px; color: #334155; margin: 0; }
+            :root { --accent: #003399; --bg: #f0f4ff; }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body { font-family: -apple-system, 'Noto Sans JP', sans-serif; background: var(--bg); padding: 20px; }
+            header { text-align: center; padding: 40px 20px; }
+            h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); color: var(--accent); }
+            header p { color: #64748b; margin-top: 8px; }
+            .cards { display: flex; flex-direction: column; gap: 32px; max-width: 780px; margin: 0 auto; }
+            .card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+            .card-body { padding: 24px; }
+            .tag { display: inline-block; background: var(--accent); color: #fff; font-size: 12px; font-weight: bold; padding: 4px 12px; border-radius: 6px; margin-bottom: 14px; letter-spacing: 0.05em; }
+            .card-title { font-size: clamp(1rem, 3vw, 1.3rem); font-weight: bold; color: #0f172a; line-height: 1.4; margin-bottom: 12px; }
+            .card-title a { color: inherit; text-decoration: none; }
+            .card-title a:hover { text-decoration: underline; }
+            .card-snippet { font-size: 14px; line-height: 1.7; color: #475569; margin-bottom: 16px; }
+            .insight-box { background: #f1f5f9; border-left: 4px solid var(--accent); padding: 16px 20px; border-radius: 0 10px 10px 0; }
+            .insight-label { font-size: 11px; font-weight: bold; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 6px; }
+            .insight-text { font-size: 14px; line-height: 1.7; color: #334155; }
+            .slide-img-wrap { padding: 0 0 0 0; cursor: zoom-in; }
+            .slide-img-wrap img { width: 100%; height: auto; display: block; border-top: 1px solid #e2e8f0; }
+            /* ライトボックス */
+            #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
+            #lightbox.open { display: flex; }
+            #lightbox img { max-width: 100%; max-height: 90vh; border-radius: 12px; object-fit: contain; }
+            #lightbox-close { position: fixed; top: 16px; right: 16px; background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 28px; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         </style>
     </head>
     <body>
         <header>
             <h1>Weekly Ice Break Trends</h1>
-            <p>エンジニアのための最新テックトレンド・スライド</p>
+            <p>エンジニアのための最新テックトレンド</p>
         </header>
 
-        <div class="grid" id="slide-grid">
+        <div class="cards">
             
-            <div class="slide-card">
-                <img src="output/icebreak_slide_0.png" alt="Slide 0">
-                <div class="slide-info">
-                    <div class="slide-tag">SonyAlpha/Imaging</div>
-                    <a href="https://www.sonyalpharumors.com/sony-a7-v-review-by-philip-bloom-way-better-than-i-expected/" target="_blank" rel="noopener noreferrer">🔗 ソニー α7 V、フィリップ・ブルーム氏が絶賛：予想を遥かに超える進化！</a>
+            <div class="card">
+                <div class="card-body">
+                    <div class="tag">SonyAlpha/Imaging</div>
+                    <div class="card-title"><a href="https://www.sonyalpharumors.com/sony-a7-v-review-by-philip-bloom-way-better-than-i-expected/" target="_blank" rel="noopener noreferrer">ソニーα7 V、フィリップ・ブルーム氏が絶賛！「期待を遥かに上回る高性能」</a></div>
+                    <div class="card-snippet">著名な映像クリエイター、フィリップ・ブルーム氏がソニーの最新カメラα7 Vのレビューを公開し、自身の予想をはるかに上回る性能であると高く評価しました。その優れた機能性と画質に感銘を受けている様子が伺えます。</div>
                     <div class="insight-box">
-                        <div class="insight-label">Insight</div>
-                        <p class="insight-text">α7Vへの高評価は、ミラーレス市場におけるセンサー、AF、処理エンジンの継続的進化と、クリエイターのワークフローへの深い理解が結実した証です。特にAI駆動の次世代画像処理や動画機能は、コンテンツ制作の質と速度を飛躍的に向上させる破壊的価値を持ちます。我々エンジニアは、単なるスペック競争を超え、ソフトウェア定義型カメラの可能性を追求し、クリエイティブ体験を根本から変えるイノベーションを加速させるべきです。</p>
+                        <div class="insight-label">💡 INSIGHT</div>
+                        <div class="insight-text">α7 Vへの高い評価は、成熟期ミラーレス市場におけるソニーの技術的優位を示します。AI駆動のAF進化や画質向上は映像表現の可能性を拡大。エンジニアは、次世代AIチップによる画像処理革新に加え、プロのワークフローを再定義するクラウド連携ソリューションの構築へ深く議論すべきです。</div>
                     </div>
+                </div>
+                <div class="slide-img-wrap" onclick="openLightbox('output/icebreak_slide_0.png')">
+                    <img src="output/icebreak_slide_0.png" alt="ソニーα7 V、フィリップ・ブルーム氏が絶賛！「期待を遥かに上回る高性能」" loading="lazy">
                 </div>
             </div>
             
-            <div class="slide-card">
-                <img src="output/icebreak_slide_1.png" alt="Slide 1">
-                <div class="slide-info">
-                    <div class="slide-tag">Display/TFT</div>
-                    <a href="https://tftcentral.co.uk/news/dell-p3426web-and-p3426wev-launched-with-34-wqhd-100hz-ips-panels" target="_blank" rel="noopener noreferrer">🔗 デル、生産性・コラボレーション重視のプロ向け34インチWQHD 100Hz IPSモニター「P3426WEB/P3426WEV」を発表</a>
+            <div class="card">
+                <div class="card-body">
+                    <div class="tag">Display/TFT</div>
+                    <div class="card-title"><a href="https://tftcentral.co.uk/news/dell-p3426web-and-p3426wev-launched-with-34-wqhd-100hz-ips-panels" target="_blank" rel="noopener noreferrer">Dell、34インチWQHD 100Hz IPS搭載プロフェッショナルモニター「P3426WEB/WEV」を発表</a></div>
+                    <div class="card-snippet">デルはプロフェッショナル向け「Dell Pro P」モニターに、生産性と協業を重視した新モデルP3426WEBおよびP3426WEVを発表しました。これらは34インチWQHD 100Hz IPSパネルを搭載し、高精細で滑らかな表示を実現します。</div>
                     <div class="insight-box">
-                        <div class="insight-label">Insight</div>
-                        <p class="insight-text">プロ向けディスプレイにおいて、100Hz WQHD IPSは生産性向上の新標準。60Hzからの移行は作業効率とユーザー体験を大きく改善します。ハイブリッドワークの普及が背景にあり、内蔵カメラやUSB-C PD統合は必須トレンドです。エンジニアは、単なるパネル性能だけでなく、AI連携カメラや多デバイス接続を可能にする統合型ソリューション設計が重要。Sonyがこの市場で差別化を図るには、独自の映像・音声技術の融合戦略を深掘りすべきです。</p>
+                        <div class="insight-label">💡 INSIGHT</div>
+                        <div class="insight-text">大型高解像度・高リフレッシュレートモニターは、多画面作業が常態化する現代のエンジニアリングにおいて生産性向上の鍵です。34インチWQHD 100Hz IPSは、広大な作業空間と滑らかな描画を両立し、コードレビューやデータ分析の効率を劇的に高めます。このトレンドはGPU要件やUI/UX設計にも影響するため、開発環境最適化やマルチタスク対応UIの検討を加速すべきです。</div>
                     </div>
+                </div>
+                <div class="slide-img-wrap" onclick="openLightbox('output/icebreak_slide_1.png')">
+                    <img src="output/icebreak_slide_1.png" alt="Dell、34インチWQHD 100Hz IPS搭載プロフェッショナルモニター「P3426WEB/WEV」を発表" loading="lazy">
                 </div>
             </div>
             
-            <div class="slide-card">
-                <img src="output/icebreak_slide_2.png" alt="Slide 2">
-                <div class="slide-info">
-                    <div class="slide-tag">XR/Spatial</div>
-                    <a href="https://www.moguravr.com/bondee-service-end-2026/" target="_blank" rel="noopener noreferrer">🔗 メタバースSNS「Bondee」サービス終了：ゆるやかな繋がりを追求したアプリの撤退から見る市場の現実</a>
+            <div class="card">
+                <div class="card-body">
+                    <div class="tag">XR/Spatial</div>
+                    <div class="card-title"><a href="https://www.moguravr.com/bondee-service-end-2026/" target="_blank" rel="noopener noreferrer">アバターSNS「Bondee」サービス終了へ - ゆるやかな繋がりを模索したメタバースアプリの挑戦</a></div>
+                    <div class="card-snippet">メタバースSNS「Bondee」が2026年4月30日をもってサービス終了を発表しました。フレンドと手軽に繋がれるコンセプトで展開されてきましたが、メタバース市場の競争激化やユーザーニーズの変化が背景にあると考えられます。</div>
                     <div class="insight-box">
-                        <div class="insight-label">Insight</div>
-                        <p class="insight-text">Bondeeの終了は、メタバースが単なる仮想空間でなく、持続可能な「コミュニティと経済圏」構築の難しさを示す。アバターによるゆるい繋がりは魅力的だが、コアなエンゲージメントとマネタイズが課題だった。我々エンジニアは、次世代メタバースを設計する際、技術的実現性だけでなく、ユーザーが「居続けたい」と感じる本質的価値、コンテンツ戦略、そして明確なビジネスモデルの三位一体で議論すべきだ。単なる技術デモで終わらせず、長く愛される体験を創造する視点が不可欠となる。</p>
+                        <div class="insight-label">💡 INSIGHT</div>
+                        <div class="insight-text">「Bondee」のサービス終了は、メタバースSNSの難しさを浮き彫りにした。手軽なコミュニケーションを重視するも、競合の増加やマネタイズの課題に直面。背景には、Web3の進化やAIアバターの台頭があり、単なる「ゆるい繋がり」に留まらない、より深い没入感や実用性、あるいは明確な目的を持ったメタバース体験が求められている。今後は、AIとの連携、クリエイターエコノミーとの融合、あるいは特定のコミュニティに特化したサービス設計が鍵となりそうだ。</div>
                     </div>
+                </div>
+                <div class="slide-img-wrap" onclick="openLightbox('output/icebreak_slide_2.png')">
+                    <img src="output/icebreak_slide_2.png" alt="アバターSNS「Bondee」サービス終了へ - ゆるやかな繋がりを模索したメタバースアプリの挑戦" loading="lazy">
                 </div>
             </div>
             
-            <div class="slide-card">
-                <img src="output/icebreak_slide_3.png" alt="Slide 3">
-                <div class="slide-info">
-                    <div class="slide-tag">Gaming</div>
-                    <a href="https://www.ign.com/articles/nagoshis-gang-of-dragon-may-never-come-out-after-investor-netease-cut-funding-when-it-realized-an-extra-44-million-was-needed-to-finish-the-game" target="_blank" rel="noopener noreferrer">🔗 「龍が如く」名越氏の新作、netbeansからの資金調達停止で開発中止の危機</a>
+            <div class="card">
+                <div class="card-body">
+                    <div class="tag">Gaming</div>
+                    <div class="card-title"><a href="https://www.4gamer.net/games/988/G098876/20260306078/" target="_blank" rel="noopener noreferrer">開発者の金縛り・悪夢体験を3Dホラーゲーム化――「Unsealed: The Mare」3月10日配信開始</a></div>
+                    <div class="card-snippet">PerpGamesは、開発者の金縛りや悪夢体験を元にした一人称視点3Dホラーゲーム「Unsealed: The Mare」を3月10日に配信開始すると発表しました。スウェーデンのGamhallaが開発し、プレイヤーに強烈な恐怖体験を提供します。心臓の弱い方はご注意ください。</div>
                     <div class="insight-box">
-                        <div class="insight-label">Insight</div>
-                        <p class="insight-text">NetEaseによる資金調達停止は、ゲーム開発におけるリスク管理の厳格化を示す象徴的な出来事だ。AAAタイトル開発には数億ドル規模の投資が常態化する中、採算ラインの見極めがよりシビアになっている。名越氏の新作がこのままお蔵入りとなれば、IP創出における投資判断の難しさが浮き彫りになる。エンジニアとしては、開発初期段階からROI（投資収益率）を意識した開発体制や、技術的負債を抑制するアーキテクチャ設計の重要性を再認識し、コスト効率とクリエイティビティの両立について議論すべきだろう。</p>
+                        <div class="insight-label">💡 INSIGHT</div>
+                        <div class="insight-text">開発者の個人的な悪夢体験をゲーム化するというアプローチは、AI生成コンテンツの台頭や、よりパーソナルで感情に訴えかける体験への需要増という現代のトレンドと共鳴します。悪夢という非現実的かつ強烈な体験を、UnityなどのゲームエンジンとVR技術を組み合わせることで、没入感の高いホラー表現として具現化する技術的挑戦は興味深いです。これは、クリエイターの主観的体験をデジタルコンテンツ化する新たな可能性を示唆しており、今後は「個人的体験のデジタル化」というテーマで、技術と倫理の議論を深めるべきでしょう。</div>
                     </div>
+                </div>
+                <div class="slide-img-wrap" onclick="openLightbox('output/icebreak_slide_3.png')">
+                    <img src="output/icebreak_slide_3.png" alt="開発者の金縛り・悪夢体験を3Dホラーゲーム化――「Unsealed: The Mare」3月10日配信開始" loading="lazy">
                 </div>
             </div>
             
-            <div class="slide-card">
-                <img src="output/icebreak_slide_4.png" alt="Slide 4">
-                <div class="slide-info">
-                    <div class="slide-tag">AI/Software</div>
-                    <a href="https://zenn.dev/kusaaagi/articles/claude-code-hidden-commands" target="_blank" rel="noopener noreferrer">🔗 Claude Code の隠れた便利コマンド5選</a>
+            <div class="card">
+                <div class="card-body">
+                    <div class="tag">AI/Software</div>
+                    <div class="card-title"><a href="https://zenn.dev/kusaaagi/articles/claude-code-hidden-commands" target="_blank" rel="noopener noreferrer">Claude Codeの便利コマンド5選：コード生成AI活用を加速する隠し機能</a></div>
+                    <div class="card-snippet">Claude Codeには、利用状況を分析しHTMLレポート化する隠しコマンド`/insights`が存在します。この記事では、偶然発見されたこのコマンドを含む、特に便利で面白い5つの機能を厳選して紹介し、Claude Codeの潜在能力を探ります。</div>
                     <div class="insight-box">
-                        <div class="insight-label">Insight</div>
-                        <p class="insight-text">AIコーディングアシスタントの進化は目覚ましく、Claude Codeの/insightsコマンドは、単なるコード生成支援に留まらない、開発者体験の最適化という新たなトレンドを示唆しています。自身の利用状況を客観的に把握できるレポート機能は、生産性向上に直結する可能性を秘めています。開発者は、AIツールの活用度を定量的に評価し、より効果的な開発フローを設計するための議論を深めるべきでしょう。これは、AIとの協働による次世代開発環境構築の第一歩です。</p>
+                        <div class="insight-label">💡 INSIGHT</div>
+                        <div class="insight-text">コード生成AIの活用は、個々の開発者の生産性向上に留まらず、チーム全体の開発プロセス最適化へと進化しています。Claude Codeの`/insights`コマンドは、その利用状況の可視化を通じて、AIの特性を最大限に引き出すためのデータドリブンなアプローチを可能にします。これは、AIとの協働における「戦略的活用」の萌芽であり、今後はAIの利用パターン分析から、より高度なコード生成戦略や、開発者体験（DX）向上のための新たなインターフェース設計へと繋がる議論が期待されます。エンジニアは、AIの「ブラックボックス」を理解し、その出力を評価・改善する能力を磨くと共に、AI自身を「改善」するフィードバックループの構築を模索すべきです。</div>
                     </div>
+                </div>
+                <div class="slide-img-wrap" onclick="openLightbox('output/icebreak_slide_4.png')">
+                    <img src="output/icebreak_slide_4.png" alt="Claude Codeの便利コマンド5選：コード生成AI活用を加速する隠し機能" loading="lazy">
                 </div>
             </div>
             
         </div>
+
+        <!-- ライトボックス -->
+        <div id="lightbox" onclick="closeLightbox()">
+            <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+            <img id="lightbox-img" src="" alt="slide">
+        </div>
+
+        <script>
+            function openLightbox(src) {
+                document.getElementById('lightbox-img').src = src;
+                document.getElementById('lightbox').classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeLightbox() {
+                document.getElementById('lightbox').classList.remove('open');
+                document.body.style.overflow = '';
+            }
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+        </script>
     </body>
     </html>
     
