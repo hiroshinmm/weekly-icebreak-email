@@ -8,6 +8,8 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,9 +41,11 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/*.png docs/index.html || true
+          git add docs/index.html || true
+          # 画像ディレクトリがあれば追加
+          [ -d "output" ] && git add output/*.png || true
           git commit -m "docs: update weekly icebreak slides [skip ci]" || echo "No changes to commit"
-          git push
+          git push origin HEAD:${GITHUB_REF}
 
   # 新規: GitHub Pagesへのデプロイジョブ (404対策)
   deploy-pages:

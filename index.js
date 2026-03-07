@@ -185,6 +185,57 @@ async function sendEmail(attachments, topics) {
     const repoName = process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : 'your-repo';
     const pageUrl = `https://${process.env.GITHUB_REPOSITORY_OWNER || 'your-username'}.github.io/${repoName}/`;
 
+    // ========== 3. Webページ(docs/index.html)の生成を追加 ==========
+    const docsDir = path.join(__dirname, 'docs');
+    if (!fs.existsSync(docsDir)) fs.mkdirSync(docsDir);
+
+    const indexHtml = `
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Weekly Icebreak Slides</title>
+        <style>
+            :root { --bg: #f8fafc; --text: #1e293b; --accent: #003399; }
+            body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg); color: var(--text); padding: 40px; display: flex; flex-direction: column; align-items: center; }
+            header { text-align: center; margin-bottom: 60px; }
+            h1 { font-size: 2.5rem; color: var(--accent); margin-bottom: 10px; }
+            .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 40px; width: 100%; max-width: 1400px; }
+            .slide-card { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+            .slide-card img { width: 100%; height: auto; display: block; border-bottom: 1px solid #e2e8f0; }
+            .slide-info { padding: 20px; font-size: 16px; line-height: 1.5; }
+            .slide-info a { color: var(--accent); text-decoration: none; font-weight: bold; }
+            .slide-info a:hover { text-decoration: underline; }
+            .slide-tag { display: inline-block; font-size: 12px; background: #e2e8f0; padding: 4px 8px; border-radius: 4px; margin-bottom: 8px; font-weight: bold;}
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>Weekly Icebreak Trends</h1>
+            <p>エンジニアのための最新テックトレンド・スライド</p>
+        </header>
+
+        <div class="grid" id="slide-grid">
+            ${topics.map((t, i) => `
+            <div class="slide-card">
+                <!-- <img src="../output/icebreak_slide_${i}.png" alt="Slide ${i}"> -->
+                <div class="slide-info">
+                    <div class="slide-tag">${t.tag}</div><br>
+                    🔗 <a href="${t.link}" target="_blank" rel="noopener noreferrer">${t.title}</a>
+                    <p style="font-size: 14px; color: #64748b; margin-top: 8px;">${t.insight}</p>
+                </div>
+            </div>
+            `).join('')}
+        </div>
+    </body>
+    </html>
+    `;
+    fs.writeFileSync(path.join(docsDir, 'index.html'), indexHtml);
+    console.log('docs/index.html generated successfully.');
+
+    // =========================================================
+
     // HTMLメール本文の組み立て
     const htmlBody = `
     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
