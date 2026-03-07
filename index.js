@@ -70,33 +70,36 @@ async function generateInsight(topic) {
         try {
             result = await model.generateContent(prompt);
         } catch (e) {
-            // 429レート制限の場合、推奨待機時間を抽出してリトライ
-            if (e.message && e.message.includes('429')) {
+            const is429 = e.message && e.message.includes('429');
+            const isDayLimit = is429 && e.message.includes('PerDay');
+
+            if (is429 && !isDayLimit) {
+                // 分間レートリミット → 待機してリトライ
                 const retryMatch = e.message.match(/retry in (\d+(\.\d+)?)s/i);
                 const waitSec = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) + 5 : 60;
-                console.warn(`Rate limited (429). Waiting ${waitSec}s before retry...`);
+                console.warn(`Rate limited (429 per-minute). Waiting ${waitSec}s before retry...`);
                 await new Promise(resolve => setTimeout(resolve, waitSec * 1000));
                 try {
                     result = await model.generateContent(prompt);
                 } catch (e2) {
-                    console.warn('Retry failed, falling back to gemini-1.5-flash:', e2.message);
+                    // リトライも失敗 → flash-liteへフォールバック
+                    console.warn('Retry failed, falling back to gemini-2.0-flash-lite:', e2.message);
                     model = genAI.getGenerativeModel({
-                        model: "gemini-1.5-flash",
-                        generationConfig: {
-                            responseMimeType: "application/json",
-                            responseSchema: schema
-                        }
+                        model: "gemini-2.0-flash-lite",
+                        generationConfig: { responseMimeType: "application/json", responseSchema: schema }
                     });
                     result = await model.generateContent(prompt);
                 }
             } else {
-                console.warn('Fallback to gemini-1.5-flash due to error:', e.message);
+                // 1日クォータ切れ or 404等 → 即座にflash-liteへフォールバック
+                if (isDayLimit) {
+                    console.warn('Day quota exhausted for gemini-2.0-flash. Switching to gemini-2.0-flash-lite...');
+                } else {
+                    console.warn('Fallback to gemini-2.0-flash-lite due to error:', e.message.slice(0, 80));
+                }
                 model = genAI.getGenerativeModel({
-                    model: "gemini-1.5-flash",
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        responseSchema: schema
-                    }
+                    model: "gemini-2.0-flash-lite",
+                    generationConfig: { responseMimeType: "application/json", responseSchema: schema }
                 });
                 result = await model.generateContent(prompt);
             }
