@@ -19,7 +19,7 @@ async function generateInsight(topic) {
 
     try {
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // または "gemini-1.5-flash-latest"
 
         const prompt = `
 あなたは世界最高峰の技術コンサルタントです。以下のテックニュースの「タイトル」と「概要」を読み、ソニーのハードウェア/ソフトウェアエンジニアが定例ミーティングで盛り上がれるような、鋭く、ワクワクする「一言考察（Insight）」を日本語で100文字以内で作成してください。
