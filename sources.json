@@ -1,0 +1,76 @@
+[
+    {
+        "category": "SonyAlpha/Imaging",
+        "urls": [
+            "https://www.sonyalpharumors.com/feed/"
+        ],
+        "keywords": [
+            "sony",
+            "alpha",
+            "lens",
+            "camera",
+            "sensor"
+        ]
+    },
+    {
+        "category": "Display/TFT",
+        "urls": [
+            "https://www.tftcentral.co.uk/feed"
+        ],
+        "keywords": [
+            "monitor",
+            "display",
+            "panel",
+            "tft",
+            "oled",
+            "led",
+            "hz"
+        ]
+    },
+    {
+        "category": "XR/Spatial",
+        "urls": [
+            "https://www.theverge.com/rss/vr-virtual-reality/index.xml"
+        ],
+        "keywords": [
+            "vr",
+            "ar",
+            "mr",
+            "xr",
+            "vision pro",
+            "meta quest",
+            "headset",
+            "spatial"
+        ]
+    },
+    {
+        "category": "Gaming",
+        "urls": [
+            "https://www.theverge.com/rss/gaming/index.xml"
+        ],
+        "keywords": [
+            "game",
+            "playstation",
+            "xbox",
+            "nintendo",
+            "steam",
+            "gpu",
+            "rtx"
+        ]
+    },
+    {
+        "category": "AI/Software",
+        "urls": [
+            "https://zenn.dev/feed"
+        ],
+        "keywords": [
+            "ai",
+            "llm",
+            "gpt",
+            "openai",
+            "claude",
+            "developer",
+            "software"
+        ]
+    }
+]

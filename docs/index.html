@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Icebreak Slides</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --accent: #003399;
+        }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 40px;
+            width: 100%;
+            max-width: 1400px;
+        }
+        .slide-card {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        .slide-card:hover {
+            transform: translateY(-10px);
+        }
+        .slide-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .slide-info {
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        footer {
+            margin-top: 80px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Weekly Icebreak Trends</h1>
+        <p>エンジニアのための最新テックトレンド・スライド</p>
+    </header>
+
+    <div class="grid" id="slide-grid">
+        <!-- JSで動的に追加、またはシンプルにするため静的パスで記述 -->
+        <div class="slide-card"><img src="../output/icebreak_slide_0.png" alt="Slide 0"></div>
+        <div class="slide-card"><img src="../output/icebreak_slide_1.png" alt="Slide 1"></div>
+        <div class="slide-card"><img src="../output/icebreak_slide_2.png" alt="Slide 2"></div>
+        <div class="slide-card"><img src="../output/icebreak_slide_3.png" alt="Slide 3"></div>
+        <div class="slide-card"><img src="../output/icebreak_slide_4.png" alt="Slide 4"></div>
+        <div class="slide-card"><img src="../output/icebreak_slide_5.png" alt="Slide 5"></div>
+        <div class="slide-card"><img src="../output/icebreak_slide_6.png" alt="Slide 6"></div>
+        <div class="slide-card"><img src="../output/icebreak_slide_7.png" alt="Slide 7"></div>
+    </div>
+
+    <footer>
+        &copy; 2026 Icebreak Automation Pipeline
+    </footer>
+</body>
+</html>
