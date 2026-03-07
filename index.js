@@ -19,23 +19,39 @@ async function generateInsight(topic) {
 
     try {
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        let model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
         const prompt = `
-あなたは世界最高峰の技術コンサルタントです。以下のテックニュースの「タイトル」と「概要」を読み、ソニーのハードウェア/ソフトウェアエンジニアが定例ミーティングで盛り上がれるような、鋭く、ワクワクする「一言考察（Insight）」を日本語で100文字以内で作成してください。
+あなたは優秀な翻訳家および技術コンサルタントです。
+以下のテックニュースの「タイトル」と「概要」を日本語に自然な表現で翻訳し、さらにソニーのエンジニアが定例ミーティングでワクワクするような鋭い「一言考察（Insight）」を日本語100文字以内で作成してください。
 
 ニュースタイトル: ${topic.title}
 ニュース概要: ${topic.snippet}
-カテゴリー: ${topic.tag}
 
-要件:
-- エンジニア視点で、その技術が将来どう化けるか、または既存の技術にどう影響するかを含めてください。
-- 丁寧語（〜です、〜でしょう）を使用してください。
-- 堅苦しすぎず、アイスブレイクにふさわしい知的な刺激を与えてください。
+以下のJSON形式で出力してください。Markdownのコードブロック( \`\`\`json )を含めず、純粋なJSONテキストのみを返してください。
+{
+  "translatedTitle": "日本語のタイトル",
+  "translatedSnippet": "日本語の概要",
+  "insight": "日本語の考察"
+}
 `;
 
-        const result = await model.generateContent(prompt);
-        return result.response.text().trim();
+        let result;
+        try {
+            result = await model.generateContent(prompt);
+        } catch (e) {
+            console.warn('Fallback to gemini-pro due to error:', e.message);
+            model = genAI.getGenerativeModel({ model: "gemini-pro" });
+            result = await model.generateContent(prompt);
+        }
+
+        let responseText = result.response.text().trim();
+        responseText = responseText.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+        const json = JSON.parse(responseText);
+
+        topic.title = json.translatedTitle || topic.title;
+        topic.snippet = json.translatedSnippet || topic.snippet;
+        return json.insight || '技術革新のスピードに注目です。さらなる進展が期待されます。';
     } catch (err) {
         console.error('Gemini API Error:', err.message);
         return '技術革新のスピードに注目です。さらなる進展が期待されます。';
@@ -76,16 +92,35 @@ async function fetchTopics() {
                     const isRelevant = source.keywords.some(kw => content.includes(kw.toLowerCase()));
 
                     if (isRelevant) {
+                        let imageUrl = null;
+
+                        // 多様なRSSの画像タグからの抽出対応
+                        const possibleImageLocations = [
+                            item.enclosure?.url,
+                            item.content?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
+                            item['content:encoded']?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
+                            item.description?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
+                            item.itunes?.image
+                        ];
+
+                        for (const url of possibleImageLocations) {
+                            if (url && url.match(/^https?:\/\//i) && url.match(/\.(jpeg|jpg|gif|png|webp)/i)) {
+                                imageUrl = url;
+                                break;
+                            }
+                        }
+
                         allTopics.push({
                             title: item.title,
                             link: item.link,
                             tag: source.category,
                             pubDate: pubDate.toLocaleDateString('ja-JP'),
-                            snippet: (item.contentSnippet || '').slice(0, 150) + '...',
+                            snippet: (item.contentSnippet || '').slice(0, 200) + '...',
+                            imageUrl: imageUrl,
                             insight: '最新のトレンドに基づいた考察（自動生成予定）'
                         });
                     }
-                }
+                } // /for (const item of feed.items)
             } catch (err) {
                 console.error(`Failed to fetch from ${url}:`, err.message);
             }
@@ -180,7 +215,9 @@ async function generateAllSlideImages(topics) {
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    padding: 40px;
+                    padding: 0;
+                    overflow: hidden;
+                    position: relative;
                 }
                 .tag {
                     display: inline-block;
@@ -245,8 +282,12 @@ async function generateAllSlideImages(topics) {
                         Source: ${topic.tag} | Published: ${topic.pubDate}
                     </div>
                 </div>
-                <div class="content-right">
-                    <div style="font-size:120px;">📰</div>
+                <!-- 画像表示部分: URLがあれば表示、読み込みエラー時はフォールバックの絵文字 -->
+                <div class="content-right" style="position: relative; background: #f1f5f9; display: flex; justify-content: center; align-items: center; overflow: hidden; width: 100%; height: 100%;">
+                    ${topic.imageUrl ? `
+                    <img src="${topic.imageUrl}" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1;" onerror="this.style.display='none'; document.getElementById('fallback-${index}').style.display='flex'">
+                    <div id="fallback-${index}" style="position: absolute; display: none; font-size:120px; z-index:0; width: 100%; height: 100%; justify-content: center; align-items: center;">📰</div>
+                    ` : `<div style="font-size:120px;">📰</div>`}
                 </div>
             </div>
         </body>
@@ -272,7 +313,6 @@ async function generateAllSlideImages(topics) {
 async function sendEmail(attachments, topics) {
     const configPath = path.join(__dirname, 'config.json');
 
-    // GitHub Actions環境では環境変数を使用
     const user = process.env.GMAIL_USER || (fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath)).email.user : null);
     const pass = process.env.GMAIL_PASS || (fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath)).email.pass : null);
     const to = process.env.GMAIL_TO || (fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath)).email.to : null);
@@ -289,11 +329,40 @@ async function sendEmail(attachments, topics) {
 
     const pageUrl = `https://${process.env.GITHUB_REPOSITORY_OWNER || 'your-username'}.github.io/${process.env.GITHUB_REPOSITORY_NAME || 'your-repo'}/docs/`;
 
+    // HTMLメール本文の組み立て
+    const htmlBody = `
+    <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #003399; border-bottom: 2px solid #003399; padding-bottom: 10px;">Weekly Icebreak Trends</h2>
+        <p>今週の最新テックトレンドをお届けします。ミーティングのアイスブレイクにご活用ください。</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="${pageUrl}" style="background-color: #003399; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Webブラウザで全スライドを見る</a>
+        </div>
+
+        <h3 style="margin-top: 40px;">📝 今週のトピック一覧</h3>
+        <ul style="list-style-type: none; padding-left: 0;">
+            ${topics.map((t, i) => `
+                <li style="margin-bottom: 20px; padding: 15px; background-color: #f8fafc; border-radius: 8px; border-left: 4px solid #003399;">
+                    <span style="font-size: 12px; color: #64748b; font-weight: bold;">[${t.tag}]</span><br>
+                    <a href="${t.link}" style="font-size: 16px; font-weight: bold; color: #1e293b; text-decoration: none;">${t.title}</a>
+                    <p style="font-size: 14px; color: #475569; margin-top: 8px;">${t.insight}</p>
+                </li>
+            `).join('')}
+        </ul>
+        
+        <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 40px;">
+            This email is automatically generated by Weekly Icebreak Automation.<br>
+            Attached are ${attachments.length} high-resolution slides for your presentation.
+        </p>
+    </div>
+    `;
+
     await transporter.sendMail({
         from: `"Weekly Icebreak" <${user}>`,
         to: to,
-        subject: `[Weekly Icebreak] 最新テックトレンド ${topics.length}選`,
+        subject: `[Weekly Ice Break] 最新テックネタ ${topics.length}選`,
         text: `今週のトレンドスライドを生成しました。\n\nWebで見る:\n${pageUrl}\n\nトピック一覧:\n${topics.map((t, i) => `${i + 1}. ${t.title}`).join('\n')}`,
+        html: htmlBody,
         attachments: attachments.map(a => ({ filename: a.filename, path: a.path }))
     });
 }
