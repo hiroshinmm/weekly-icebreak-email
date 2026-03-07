@@ -73,29 +73,32 @@
         ]
     },
     {
-        "category": "Gaming",
+        "category": "Gaming/Hardware",
         "urls": [
             "https://www.4gamer.net/rss/index.xml",
-            "https://game.watch.impress.co.jp/data/rss/1.0/gmw/feed.rdf",
-            "https://automaton-media.com/feed/",
-            "https://blog.ja.playstation.com/feed/",
+            "https://pc.watch.impress.co.jp/data/rss/1.0/pcw/feed.rdf",
+            "https://rss.itmedia.co.jp/rss/2.0/pcuser.xml",
+            "https://www.techpowerup.com/rss/news",
             "https://www.theverge.com/rss/gaming/index.xml"
         ],
         "keywords": [
-            "game",
-            "playstation",
-            "xbox",
-            "nintendo",
-            "steam",
+            "monitor",
+            "display",
             "gpu",
             "rtx",
-            "switch",
-            "ゲーム",
-            "PS5",
-            "スイッチ",
-            "任天堂",
-            "新作",
-            "発売"
+            "radeon",
+            "oled",
+            "gaming pc",
+            "controller",
+            "keyboard",
+            "mouse",
+            "ゲーミングモニター",
+            "ディスプレイ",
+            "グラフィックボード",
+            "グラボ",
+            "ゲーミングPC",
+            "デバイス",
+            "周辺機器"
         ]
     },
     {
