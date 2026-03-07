@@ -4,6 +4,8 @@ const Parser = require('rss-parser');
 const puppeteer = require('puppeteer');
 const nodemailer = require('nodemailer');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 const parser = new Parser();
 
@@ -32,7 +34,7 @@ async function generateInsight(topic) {
                 },
                 insight: {
                     type: "string",
-                    description: "Deep technical insight in Japanese for engineers (around 400 characters)"
+                    description: "Deep technical insight in Japanese for engineers (around 200 characters)"
                 }
             },
             required: ["translatedTitle", "translatedSnippet", "insight"]
@@ -55,7 +57,7 @@ async function generateInsight(topic) {
 【出力要件】
 1. ニュースタイトルを、ソニーのエンジニア向けに適切で興味深い日本語に翻訳してください（translatedTitle）。
 2. ニュースの内容を、途中で文章が切れないよう、意味が通る完全な日本語の文章で100〜150文字程度に要約してください（translatedSnippet）。
-3. エンジニアがワクワクするような鋭い「一言考察（Insight）」を日本語で【400文字程度】作成してください（insight）。
+3. エンジニアがワクワクするような鋭い「一言考察（Insight）」を日本語で【200文字程度】作成してください（insight）。
 
 【Insightに必ず含めるべき観点】
 - この技術の背景とトレンドにおける立ち位置
@@ -127,6 +129,26 @@ async function generateInsight(topic) {
     }
 }
 
+// OGPから画像を取得するヘルパー関数
+async function fetchOgImage(articleUrl) {
+    if (!articleUrl || articleUrl === '#') return null;
+    try {
+        const res = await axios.get(articleUrl, {
+            timeout: 5000,
+            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; IceBreakBot/1.0)' }
+        });
+        const $ = cheerio.load(res.data);
+        const ogImage = $('meta[property="og:image"]').attr('content')
+            || $('meta[name="twitter:image"]').attr('content');
+        if (ogImage && ogImage.match(/^https?:\/\//i)) {
+            return ogImage;
+        }
+    } catch (e) {
+        // OGP取得失敗はサイレントに無視
+    }
+    return null;
+}
+
 // ニュースソースの読み込み
 const sourcesPath = path.join(__dirname, 'sources.json');
 let sources = [];
@@ -174,13 +196,21 @@ async function fetchTopics() {
                         ];
 
                         for (const url of possibleImageLocations) {
-                            if (url && url.match(/^https?:\/\//i) && url.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i)) {
-                                imageUrl = url;
-                                break;
+                            if (url && url.match(/^https?:\/\//i)) {
+                                // 画像らしいURL（拡張子あり）またはCDN URLを許可
+                                if (url.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i) || url.includes('/image') || url.includes('/img') || url.includes('cdn') || url.includes('media')) {
+                                    imageUrl = url;
+                                    break;
+                                }
                             }
                         }
 
                         const cleanSnippet = (item.contentSnippet || item.content || '').replace(/(<([^>]+)>)/gi, "").trim();
+
+                        // RSSに画像がなければOGPから取得
+                        if (!imageUrl && item.link) {
+                            imageUrl = await fetchOgImage(item.link);
+                        }
 
                         allTopics.push({
                             title: item.title,
