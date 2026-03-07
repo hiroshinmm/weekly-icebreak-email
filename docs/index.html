@@ -1,87 +1,105 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weekly Icebreak Slides</title>
-    <style>
-        :root {
-            --bg: #f8fafc;
-            --text: #1e293b;
-            --accent: #003399;
-        }
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            color: var(--accent);
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
-            gap: 40px;
-            width: 100%;
-            max-width: 1400px;
-        }
-        .slide-card {
-            background: white;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
-        }
-        .slide-card:hover {
-            transform: translateY(-10px);
-        }
-        .slide-card img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        .slide-info {
-            padding: 20px;
-            border-top: 1px solid #e2e8f0;
-        }
-        footer {
-            margin-top: 80px;
-            color: #94a3b8;
-            font-size: 0.9rem;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Weekly Icebreak Trends</h1>
-        <p>エンジニアのための最新テックトレンド・スライド</p>
-    </header>
 
-    <div class="grid" id="slide-grid">
-        <!-- JSで動的に追加、またはシンプルにするため静的パスで記述 -->
-        <div class="slide-card"><img src="../output/icebreak_slide_0.png" alt="Slide 0"></div>
-        <div class="slide-card"><img src="../output/icebreak_slide_1.png" alt="Slide 1"></div>
-        <div class="slide-card"><img src="../output/icebreak_slide_2.png" alt="Slide 2"></div>
-        <div class="slide-card"><img src="../output/icebreak_slide_3.png" alt="Slide 3"></div>
-        <div class="slide-card"><img src="../output/icebreak_slide_4.png" alt="Slide 4"></div>
-        <div class="slide-card"><img src="../output/icebreak_slide_5.png" alt="Slide 5"></div>
-        <div class="slide-card"><img src="../output/icebreak_slide_6.png" alt="Slide 6"></div>
-        <div class="slide-card"><img src="../output/icebreak_slide_7.png" alt="Slide 7"></div>
-    </div>
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Weekly Icebreak Slides</title>
+        <style>
+            :root { --bg: #f8fafc; --text: #1e293b; --accent: #003399; }
+            body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg); color: var(--text); padding: 40px; display: flex; flex-direction: column; align-items: center; }
+            header { text-align: center; margin-bottom: 60px; }
+            h1 { font-size: 2.5rem; color: var(--accent); margin-bottom: 10px; }
+            .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 40px; width: 100%; max-width: 1400px; }
+            .slide-card { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+            .slide-card img { width: 100%; height: auto; display: block; border-bottom: 1px solid #e2e8f0; }
+            .slide-info { padding: 20px; font-size: 16px; line-height: 1.5; }
+            .slide-info a { color: var(--accent); text-decoration: none; font-weight: bold; }
+            .slide-info a:hover { text-decoration: underline; }
+            .slide-tag { display: inline-block; font-size: 12px; background: #e2e8f0; padding: 4px 8px; border-radius: 4px; margin-bottom: 8px; font-weight: bold;}
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>Weekly Icebreak Trends</h1>
+            <p>エンジニアのための最新テックトレンド・スライド</p>
+        </header>
 
-    <footer>
-        &copy; 2026 Icebreak Automation Pipeline
-    </footer>
-</body>
-</html>
+        <div class="grid" id="slide-grid">
+            
+            <div class="slide-card">
+                <!-- <img src="../output/icebreak_slide_0.png" alt="Slide 0"> -->
+                <div class="slide-info">
+                    <div class="slide-tag">SonyAlpha/Imaging</div><br>
+                    🔗 <a href="https://www.sonyalpharumors.com/sony-tidbits-1889/" target="_blank" rel="noopener noreferrer">Sony Tidbits…</a>
+                    <p style="font-size: 14px; color: #64748b; margin-top: 8px;">技術革新のスピードに注目です。さらなる進展が期待されます。</p>
+                </div>
+            </div>
+            
+            <div class="slide-card">
+                <!-- <img src="../output/icebreak_slide_1.png" alt="Slide 1"> -->
+                <div class="slide-info">
+                    <div class="slide-tag">Display/TFT</div><br>
+                    🔗 <a href="https://tftcentral.co.uk/news/dell-p3426web-and-p3426wev-launched-with-34-wqhd-100hz-ips-panels" target="_blank" rel="noopener noreferrer">Dell P3426WEB and P3426WEV Launched with 34″ WQHD 100Hz IPS Panels</a>
+                    <p style="font-size: 14px; color: #64748b; margin-top: 8px;">技術革新のスピードに注目です。さらなる進展が期待されます。</p>
+                </div>
+            </div>
+            
+            <div class="slide-card">
+                <!-- <img src="../output/icebreak_slide_2.png" alt="Slide 2"> -->
+                <div class="slide-info">
+                    <div class="slide-tag">AI/Software</div><br>
+                    🔗 <a href="https://zenn.dev/komlock_lab/articles/openai-symphony" target="_blank" rel="noopener noreferrer">Symphony - OpenAIが発表したチケット駆動AI開発ツールについて</a>
+                    <p style="font-size: 14px; color: #64748b; margin-top: 8px;">技術革新のスピードに注目です。さらなる進展が期待されます。</p>
+                </div>
+            </div>
+            
+            <div class="slide-card">
+                <!-- <img src="../output/icebreak_slide_3.png" alt="Slide 3"> -->
+                <div class="slide-info">
+                    <div class="slide-tag">SonyAlpha/Imaging</div><br>
+                    🔗 <a href="https://www.sonyalpharumors.com/bhphoto-launched-the-new-wppi-specials/" target="_blank" rel="noopener noreferrer">BHphoto launched the new WPPI specials</a>
+                    <p style="font-size: 14px; color: #64748b; margin-top: 8px;">技術革新のスピードに注目です。さらなる進展が期待されます。</p>
+                </div>
+            </div>
+            
+            <div class="slide-card">
+                <!-- <img src="../output/icebreak_slide_4.png" alt="Slide 4"> -->
+                <div class="slide-info">
+                    <div class="slide-tag">SonyAlpha/Imaging</div><br>
+                    🔗 <a href="https://www.sonyalpharumors.com/sony-a7cr-successor-wishlist-by-edward-noble/" target="_blank" rel="noopener noreferrer">Sony A7cR Successor Wishlist by Edward Noble</a>
+                    <p style="font-size: 14px; color: #64748b; margin-top: 8px;">技術革新のスピードに注目です。さらなる進展が期待されます。</p>
+                </div>
+            </div>
+            
+            <div class="slide-card">
+                <!-- <img src="../output/icebreak_slide_5.png" alt="Slide 5"> -->
+                <div class="slide-info">
+                    <div class="slide-tag">SonyAlpha/Imaging</div><br>
+                    🔗 <a href="https://www.sonyalpharumors.com/samyang-silently-announced-this-new-af-35mm-f-1-8-p-fe-lens/" target="_blank" rel="noopener noreferrer">Samyang “silently” announced this new AF 35mm f/1.8 P FE lens</a>
+                    <p style="font-size: 14px; color: #64748b; margin-top: 8px;">技術革新のスピードに注目です。さらなる進展が期待されます。</p>
+                </div>
+            </div>
+            
+            <div class="slide-card">
+                <!-- <img src="../output/icebreak_slide_6.png" alt="Slide 6"> -->
+                <div class="slide-info">
+                    <div class="slide-tag">SonyAlpha/Imaging</div><br>
+                    🔗 <a href="https://www.sonyalpharumors.com/sony-tidbits-1888/" target="_blank" rel="noopener noreferrer">Sony Tidbits…</a>
+                    <p style="font-size: 14px; color: #64748b; margin-top: 8px;">技術革新のスピードに注目です。さらなる進展が期待されます。</p>
+                </div>
+            </div>
+            
+            <div class="slide-card">
+                <!-- <img src="../output/icebreak_slide_7.png" alt="Slide 7"> -->
+                <div class="slide-info">
+                    <div class="slide-tag">SonyAlpha/Imaging</div><br>
+                    🔗 <a href="https://www.sonyalpharumors.com/peakdesign-launches-4-new-photography-bags-and-collected-over-1-million-dollars-in-just-1-day/" target="_blank" rel="noopener noreferrer">PeakDesign launches four new camera bags and raises over $1 million in just one day.</a>
+                    <p style="font-size: 14px; color: #64748b; margin-top: 8px;">技術革新のスピードに注目です。さらなる進展が期待されます。</p>
+                </div>
+            </div>
+            
+        </div>
+    </body>
+    </html>
+    
