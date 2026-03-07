@@ -47,6 +47,11 @@ jobs:
           git commit -m "docs: update weekly icebreak slides [skip ci]" || echo "No changes to commit"
           git push origin HEAD:${GITHUB_REF}
 
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './docs'
+
   # 新規: GitHub Pagesへのデプロイジョブ (404対策)
   deploy-pages:
     needs: build-and-deploy
@@ -58,17 +63,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-        
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './docs'
-          
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

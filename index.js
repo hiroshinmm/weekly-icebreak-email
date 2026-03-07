@@ -19,8 +19,11 @@ async function generateInsight(topic) {
 
     try {
         const genAI = new GoogleGenerativeAI(apiKey);
-        // 現在有効な標準モデル名を使用
-        let model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+        // 現在有効な標準モデル名を使用し、JSONモードを強制
+        let model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash-latest",
+            generationConfig: { responseMimeType: "application/json" }
+        });
 
         const prompt = `
 あなたは優秀な翻訳家および技術コンサルタントです。
@@ -52,13 +55,24 @@ async function generateInsight(topic) {
         } catch (e) {
             console.warn('Fallback due to error:', e.message);
             // フォールバックも1.5系を使用
-            model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
+            model = genAI.getGenerativeModel({
+                model: "gemini-1.5-pro-latest",
+                generationConfig: { responseMimeType: "application/json" }
+            });
             result = await model.generateContent(prompt);
         }
 
         let responseText = result.response.text().trim();
+        // 万が一Markdownタグが含まれていても除去
         responseText = responseText.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
-        const json = JSON.parse(responseText);
+
+        let json;
+        try {
+            json = JSON.parse(responseText);
+        } catch (parseErr) {
+            console.error('Failed to parse Gemini JSON. Response was:', responseText);
+            throw parseErr;
+        }
 
         topic.title = json.translatedTitle || topic.title;
         topic.snippet = json.translatedSnippet || topic.snippet;
