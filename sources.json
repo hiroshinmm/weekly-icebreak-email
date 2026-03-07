@@ -15,7 +15,8 @@
     {
         "category": "Display/TFT",
         "urls": [
-            "https://www.tftcentral.co.uk/feed"
+            "https://www.tftcentral.co.uk/feed",
+            "https://www.theverge.com/rss/tech/monitors/index.xml"
         ],
         "keywords": [
             "monitor",
@@ -24,13 +25,16 @@
             "tft",
             "oled",
             "led",
-            "hz"
+            "hz",
+            "resolutions"
         ]
     },
     {
         "category": "XR/Spatial",
         "urls": [
-            "https://www.theverge.com/rss/vr-virtual-reality/index.xml"
+            "https://www.theverge.com/rss/vr-virtual-reality/index.xml",
+            "https://www.moguravr.com/feed/",
+            "https://techcrunch.com/category/virtual-reality/feed/"
         ],
         "keywords": [
             "vr",
@@ -40,13 +44,16 @@
             "vision pro",
             "meta quest",
             "headset",
-            "spatial"
+            "spatial",
+            "メガネ"
         ]
     },
     {
         "category": "Gaming",
         "urls": [
-            "https://www.theverge.com/rss/gaming/index.xml"
+            "https://www.theverge.com/rss/gaming/index.xml",
+            "https://www.ign.com/rss/articles/feed",
+            "https://kotaku.com/rss"
         ],
         "keywords": [
             "game",
@@ -55,13 +62,17 @@
             "nintendo",
             "steam",
             "gpu",
-            "rtx"
+            "rtx",
+            "switch"
         ]
     },
     {
         "category": "AI/Software",
         "urls": [
-            "https://zenn.dev/feed"
+            "https://zenn.dev/feed",
+            "https://techcrunch.com/category/artificial-intelligence/feed/",
+            "https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml",
+            "https://gizmodo.com/rss"
         ],
         "keywords": [
             "ai",
@@ -69,8 +80,12 @@
             "gpt",
             "openai",
             "claude",
+            "gemini",
             "developer",
-            "software"
+            "software",
+            "人工知能",
+            "生成",
+            "copilot"
         ]
     }
 ]
