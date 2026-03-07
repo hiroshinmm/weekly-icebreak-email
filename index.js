@@ -18,46 +18,65 @@ async function generateInsight(topic) {
     }
 
     try {
+        const schema = {
+            description: "Translated news content and professional insight",
+            type: "object",
+            properties: {
+                translatedTitle: {
+                    type: "string",
+                    description: "Japanese translation of the news title"
+                },
+                translatedSnippet: {
+                    type: "string",
+                    description: "A complete, natural Japanese summary of the news (100-150 characters), not cut off"
+                },
+                insight: {
+                    type: "string",
+                    description: "Deep technical insight in Japanese for engineers (around 400 characters)"
+                }
+            },
+            required: ["translatedTitle", "translatedSnippet", "insight"]
+        };
+
         const genAI = new GoogleGenerativeAI(apiKey);
-        // 現在有効な標準モデル名を使用し、JSONモードを強制
+        // 現在有効な標準モデル名を使用し、JSONモードとSchemaを強制
         let model = genAI.getGenerativeModel({
             model: "gemini-1.5-flash-latest",
-            generationConfig: { responseMimeType: "application/json" }
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: schema
+            }
         });
 
         const prompt = `
 あなたは優秀な翻訳家および技術コンサルタントです。
-以下のテックニュースの「タイトル」と「概要」をもとに、以下の3点を作成してください。
+以下のテックニュースの「タイトル」と「概要」をもとに、プロフェッショナルな日本語コンテンツを作成してください。
 
-1. 日本語のタイトル
-2. ニュースの詳細な要約（途中で文章が切れないよう、意味が通る完全な日本語の文章で100〜150文字程度に要約）
-3. ソニーのエンジニアが定例ミーティングでワクワクするような鋭い「一言考察（Insight）」（日本語で【400文字程度】のしっかりした文章）
+【出力要件】
+1. ニュースタイトルを、ソニーのエンジニア向けに適切で興味深い日本語に翻訳してください（translatedTitle）。
+2. ニュースの内容を、途中で文章が切れないよう、意味が通る完全な日本語の文章で100〜150文字程度に要約してください（translatedSnippet）。
+3. エンジニアがワクワクするような鋭い「一言考察（Insight）」を日本語で【400文字程度】作成してください（insight）。
 
-【Insightに必ず含めるべき3つの観点】
-1. このニュース・技術の背景と現在のトレンドにおける立ち位置
-2. 技術的な面白さ、またはビジネス面での破壊的価値
-3. ソニー（または自社）のエンジニアとして、この技術を受けて今後どのような議論・アクションを起こすべきか
+【Insightに必ず含めるべき観点】
+- この技術の背景とトレンドにおける立ち位置
+- 技術的な面白さ、またはビジネス面での破壊的価値
+- エンジニアとして今後どのような議論・アクションを起こすべきか
 
 ニュースタイトル: ${topic.title}
 ニュース概要: ${topic.snippet}
-
-以下のJSON形式で出力してください。Markdownのコードブロック( \`\`\`json )を含めず、純粋なJSONテキストのみを返してください。
-{
-  "translatedTitle": "日本語のタイトル",
-  "translatedSnippet": "要約した完全な日本語の概要",
-  "insight": "日本語の考察"
-}
 `;
 
         let result;
         try {
             result = await model.generateContent(prompt);
         } catch (e) {
-            console.warn('Fallback due to error:', e.message);
-            // フォールバックも1.5系を使用
+            console.warn('Fallback to Pro model due to error:', e.message);
             model = genAI.getGenerativeModel({
                 model: "gemini-1.5-pro-latest",
-                generationConfig: { responseMimeType: "application/json" }
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: schema
+                }
             });
             result = await model.generateContent(prompt);
         }
@@ -76,10 +95,10 @@ async function generateInsight(topic) {
 
         topic.title = json.translatedTitle || topic.title;
         topic.snippet = json.translatedSnippet || topic.snippet;
-        return json.insight || '技術革新のスピードに注目です。さらなる進展が期待されます。';
+        return json.insight || 'AIによる考察の生成に失敗しました。ニュース元の情報をご確認ください。';
     } catch (err) {
-        console.error('Gemini API Error:', err.message);
-        return '技術革新のスピードに注目です。さらなる進展が期待されます。';
+        console.error('Gemini API Error details:', err);
+        return `AI考察生成エラー: ${err.message.slice(0, 100)}`;
     }
 }
 
