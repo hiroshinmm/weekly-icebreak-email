@@ -182,7 +182,8 @@ async function sendEmail(attachments, topics) {
         auth: { user, pass },
     });
 
-    const pageUrl = `https://${process.env.GITHUB_REPOSITORY_OWNER || 'your-username'}.github.io/${process.env.GITHUB_REPOSITORY_NAME || 'your-repo'}/docs/`;
+    const repoName = process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : 'your-repo';
+    const pageUrl = `https://${process.env.GITHUB_REPOSITORY_OWNER || 'your-username'}.github.io/${repoName}/`;
 
     // HTMLメール本文の組み立て
     const htmlBody = `
@@ -241,6 +242,10 @@ async function main() {
         console.log('No topics found. Skipping email.');
     }
     console.log('Done!');
+    process.exit(0);
 }
 
-main().catch(err => console.error(err));
+main().catch(err => {
+    console.error(err);
+    process.exit(1);
+});
