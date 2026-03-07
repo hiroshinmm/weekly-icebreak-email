@@ -41,14 +41,6 @@ async function generateInsight(topic) {
         };
 
         const genAI = new GoogleGenerativeAI(apiKey);
-        // 現在有効な標準モデル名を使用し、JSONモードとSchemaを強制
-        let model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
-            generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: schema
-            }
-        });
 
         const prompt = `
 あなたは優秀な翻訳家および技術コンサルタントです。
@@ -68,43 +60,56 @@ async function generateInsight(topic) {
 ニュース概要: ${topic.snippet}
 `;
 
-        let result;
-        try {
-            result = await model.generateContent(prompt);
-        } catch (e) {
-            const is429 = e.message && e.message.includes('429');
-            const isDayLimit = is429 && e.message.includes('PerDay');
+        // クォータ切れ時に自動的に次のモデルへ切り替えるリスト（優先順）
+        const MODEL_LIST = [
+            "gemini-2.5-flash",
+            "gemini-3.0-flash",
+            "gemini-2.5-flash-lite",
+            "gemini-3.1-flash-lite",
+        ];
 
-            if (is429 && !isDayLimit) {
-                // 分間レートリミット → 待機してリトライ
-                const retryMatch = e.message.match(/retry in (\d+(\.\d+)?)s/i);
-                const waitSec = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) + 5 : 60;
-                console.warn(`Rate limited (429 per-minute). Waiting ${waitSec}s before retry...`);
-                await new Promise(resolve => setTimeout(resolve, waitSec * 1000));
-                try {
-                    result = await model.generateContent(prompt);
-                } catch (e2) {
-                    // リトライも失敗 → flash-liteへフォールバック
-                    console.warn('Retry failed, falling back to gemini-2.0-flash-lite:', e2.message);
-                    model = genAI.getGenerativeModel({
-                        model: "gemini-2.5-flash",
-                        generationConfig: { responseMimeType: "application/json", responseSchema: schema }
-                    });
-                    result = await model.generateContent(prompt);
-                }
-            } else {
-                // 1日クォータ切れ or 404等 → 即座にflash-liteへフォールバック
-                if (isDayLimit) {
-                    console.warn('Day quota exhausted for gemini-2.0-flash. Switching to gemini-2.0-flash-lite...');
-                } else {
-                    console.warn('Fallback to gemini-2.0-flash-lite due to error:', e.message.slice(0, 80));
-                }
-                model = genAI.getGenerativeModel({
-                    model: "gemini-2.5-flash",
-                    generationConfig: { responseMimeType: "application/json", responseSchema: schema }
-                });
+        const modelConfig = (modelName) => genAI.getGenerativeModel({
+            model: modelName,
+            generationConfig: { responseMimeType: "application/json", responseSchema: schema }
+        });
+
+        let result;
+        let lastError;
+        for (const modelName of MODEL_LIST) {
+            try {
+                console.log(`Trying model: ${modelName}`);
+                const model = modelConfig(modelName);
                 result = await model.generateContent(prompt);
+                break; // 成功したらループを抜ける
+            } catch (e) {
+                const is429 = e.message && e.message.includes('429');
+                const isDayLimit = is429 && e.message.includes('PerDay');
+
+                if (is429 && !isDayLimit) {
+                    // 分間制限 → 少し待ってから同じモデルで再試行
+                    const retryMatch = e.message.match(/retry in (\d+(\.\d+)?)s/i);
+                    const waitSec = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) + 5 : 30;
+                    console.warn(`[${modelName}] Rate limited (per-minute). Waiting ${waitSec}s...`);
+                    await new Promise(resolve => setTimeout(resolve, waitSec * 1000));
+                    try {
+                        const model = modelConfig(modelName);
+                        result = await model.generateContent(prompt);
+                        break;
+                    } catch (e2) {
+                        console.warn(`[${modelName}] Retry failed, trying next model.`);
+                        lastError = e2;
+                    }
+                } else {
+                    // 1日クォータ切れ or 404 → 即次のモデルへ
+                    const reason = isDayLimit ? 'day quota exhausted' : e.message.slice(0, 60);
+                    console.warn(`[${modelName}] Skipping (${reason}), trying next model...`);
+                    lastError = e;
+                }
             }
+        }
+
+        if (!result) {
+            throw lastError || new Error('All Gemini models failed.');
         }
 
         let responseText = result.response.text().trim();
