@@ -19,7 +19,8 @@ async function generateInsight(topic) {
 
     try {
         const genAI = new GoogleGenerativeAI(apiKey);
-        let model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+        // 現在有効な標準モデル名を使用
+        let model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `
 あなたは優秀な翻訳家および技術コンサルタントです。
@@ -40,8 +41,9 @@ async function generateInsight(topic) {
         try {
             result = await model.generateContent(prompt);
         } catch (e) {
-            console.warn('Fallback to gemini-pro due to error:', e.message);
-            model = genAI.getGenerativeModel({ model: "gemini-pro" });
+            console.warn('Fallback due to error:', e.message);
+            // フォールバックも1.5系を使用
+            model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
             result = await model.generateContent(prompt);
         }
 
@@ -232,9 +234,11 @@ async function main() {
     // 画像を一括で生成 (1回のブラウザ起動で完結)
     const attachments = await generateAllSlideImages(topics);
 
-    // メール送信
-    if (attachments.length > 0) {
+    // 画像がなくても（テストスキップ時など）、トピックがあればメール送信
+    if (topics.length > 0) {
         await sendEmail(attachments, topics);
+    } else {
+        console.log('No topics found. Skipping email.');
     }
     console.log('Done!');
 }
