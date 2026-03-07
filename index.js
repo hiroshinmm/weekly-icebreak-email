@@ -24,8 +24,12 @@ async function generateInsight(topic) {
 
         const prompt = `
 あなたは優秀な翻訳家および技術コンサルタントです。
-以下のテックニュースの「タイトル」と「概要」を日本語に自然な表現で翻訳し、さらにソニーのエンジニアが定例ミーティングでワクワクするような鋭い「一言考察（Insight）」を日本語250文字前後で深く作成してください。
-単なる要約ではなく、技術的な意義や将来の展望、エンジニアが議論したくなるような視点を含めてください。
+以下のテックニュースの「タイトル」と「概要」を日本語に自然な表現で翻訳し、さらにソニーのエンジニアが定例ミーティングでワクワクするような鋭い「一言考察（Insight）」を日本語で【400文字程度】のしっかりした文章で作成してください。
+
+【Insightに必ず含めるべき3つの観点】
+1. このニュース・技術の背景と現在のトレンドにおける立ち位置
+2. 技術的な面白さ、またはビジネス面での破壊的価値
+3. ソニー（または自社）のエンジニアとして、この技術を受けて今後どのような議論・アクションを起こすべきか
 
 ニュースタイトル: ${topic.title}
 ニュース概要: ${topic.snippet}
@@ -170,7 +174,9 @@ async function generateAllSlideImages(topics) {
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
-    const outputDir = path.join(__dirname, 'output');
+    const docsDir = path.join(__dirname, 'docs');
+    if (!fs.existsSync(docsDir)) fs.mkdirSync(docsDir);
+    const outputDir = path.join(docsDir, 'output');
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
 
     const attachments = await Promise.all(topics.map(async (topic, index) => {
@@ -380,7 +386,7 @@ async function sendEmail(attachments, topics) {
         <div class="grid" id="slide-grid">
             ${topics.map((t, i) => `
             <div class="slide-card">
-                <img src="../output/icebreak_slide_${i}.png" alt="Slide ${i}">
+                <img src="output/icebreak_slide_${i}.png" alt="Slide ${i}">
                 <div class="slide-info">
                     <div class="slide-tag">${t.tag}</div>
                     <a href="${t.link}" target="_blank" rel="noopener noreferrer">🔗 ${t.title}</a>
