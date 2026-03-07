@@ -20,7 +20,7 @@ async function generateInsight(topic) {
     try {
         const genAI = new GoogleGenerativeAI(apiKey);
         // 現在有効な標準モデル名を使用
-        let model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        let model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
         const prompt = `
 あなたは優秀な翻訳家および技術コンサルタントです。
@@ -44,7 +44,7 @@ async function generateInsight(topic) {
         } catch (e) {
             console.warn('Fallback due to error:', e.message);
             // フォールバックも1.5系を使用
-            model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+            model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
             result = await model.generateContent(prompt);
         }
 
@@ -103,11 +103,12 @@ async function fetchTopics() {
                             item.content?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
                             item['content:encoded']?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
                             item.description?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
-                            item.itunes?.image
+                            item.itunes?.image,
+                            item.image?.url
                         ];
 
                         for (const url of possibleImageLocations) {
-                            if (url && url.match(/^https?:\/\//i) && url.match(/\.(jpeg|jpg|gif|png|webp)/i)) {
+                            if (url && url.match(/^https?:\/\//i) && url.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i)) {
                                 imageUrl = url;
                                 break;
                             }
@@ -133,24 +134,27 @@ async function fetchTopics() {
     // 重複削除 (URLが同じもの)
     const uniqueTopics = Array.from(new Map(allTopics.map(t => [t.link, t])).values());
 
-    // カテゴリーごとに最新を選び、最大8件にする
+    // 各カテゴリーごとに必ず1件 (最新のもの) を追加する
     const finalTopics = [];
-    const foundCategories = new Set();
 
-    // カテゴリーの優先度を保ちつつ抽出
-    for (const topic of uniqueTopics) {
-        if (!foundCategories.has(topic.tag) && finalTopics.length < 8) {
-            finalTopics.push(topic);
-            foundCategories.add(topic.tag);
-        }
-    }
+    for (const source of sources) {
+        // 現在のカテゴリーに一致する記事を探す
+        const categoryTopics = uniqueTopics.filter(t => t.tag === source.category);
 
-    // 足りない場合は重複カテゴリーでも追加
-    if (finalTopics.length < 8) {
-        for (const topic of uniqueTopics) {
-            if (!finalTopics.find(t => t.link === topic.link) && finalTopics.length < 8) {
-                finalTopics.push(topic);
-            }
+        if (categoryTopics.length > 0) {
+            // 見つかった場合は先頭（最新）を追加
+            finalTopics.push(categoryTopics[0]);
+        } else {
+            // 見つからなかった場合はプレースホルダーを追加
+            finalTopics.push({
+                title: "今週の最新ニュースはありませんでした",
+                link: "#",
+                tag: source.category,
+                pubDate: "---",
+                snippet: "該当カテゴリの過去10日以内の関連ニュースは見つかりませんでした。",
+                imageUrl: null,
+                insight: "引き続き次回以降のアップデートにご期待ください。"
+            });
         }
     }
 
@@ -284,11 +288,19 @@ async function generateAllSlideImages(topics) {
                         Source: ${topic.tag} | Published: ${topic.pubDate}
                     </div>
                 </div>
-                <div class="content-right" style="position: relative; background: #f1f5f9; display: flex; justify-content: center; align-items: center; overflow: hidden; width: 100%; height: 100%;">
+                <div class="content-right" style="position: relative; background: #e2e8f0; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; width: 100%; height: 100%;">
                     ${topic.imageUrl ? `
                     <img src="${topic.imageUrl}" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1;" onerror="this.style.display='none'; document.getElementById('fallback-${index}').style.display='flex'">
-                    <div id="fallback-${index}" style="position: absolute; display: none; font-size:120px; z-index:0; width: 100%; height: 100%; justify-content: center; align-items: center;">📰</div>
-                    ` : `<div style="font-size:120px;">📰</div>`}
+                    <div id="fallback-${index}" style="position: absolute; display: none; font-size:120px; z-index:0; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; color: #94a3b8;">
+                        <span style="font-size:120px; margin-bottom: 20px;">📰</span>
+                        <span style="font-size:24px; font-weight: bold;">No Image Available</span>
+                    </div>
+                    ` : `
+                    <div style="display: flex; flex-direction: column; align-items: center; color: #94a3b8;">
+                        <span style="font-size:120px; margin-bottom: 20px;">📰</span>
+                        <span style="font-size:24px; font-weight: bold;">No Image Available</span>
+                    </div>
+                    `}
                 </div>
             </div>
         </body>
