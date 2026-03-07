@@ -9,9 +9,6 @@ const cheerio = require('cheerio');
 
 const parser = new Parser();
 
-// グローバルなクォータ管理
-let isAiQuotaExhausted = false;
-
 // 1. Gemini AI による考察生成
 async function generateInsight(topic) {
     const configPath = path.join(__dirname, 'config.json');
@@ -23,9 +20,6 @@ async function generateInsight(topic) {
     }
 
     try {
-        if (isAiQuotaExhausted) {
-            return '本日分のAI生成枠を使い果たしたため、生成をスキップしました。';
-        }
         const schema = {
             description: "Translated news content and professional insight",
             type: "object",
@@ -66,12 +60,13 @@ async function generateInsight(topic) {
 ニュース概要: ${topic.snippet}
 `;
 
-        // クォータ切れ時に自動的に次のモデルへ切り替えるリスト（優先順）
+        // クォータ切れ時に自動的に次のモデルへ切り替えるリスト
+        // 500リクエスト/日ある 3.1-flash-lite を最優先にします
         const MODEL_LIST = [
-            "gemini-2.5-flash",
-            "gemini-3.0-flash",
-            "gemini-2.5-flash-lite",
             "gemini-3.1-flash-lite",
+            "gemini-3.0-flash",
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite",
         ];
 
         const modelConfig = (modelName) => genAI.getGenerativeModel({
@@ -115,10 +110,6 @@ async function generateInsight(topic) {
         }
 
         if (!result) {
-            if (lastError && lastError.message && lastError.message.includes('PerDay')) {
-                isAiQuotaExhausted = true;
-                console.error('CRITICAL: Day quota exhausted for all candidate models. Skipping AI insights for remaining topics.');
-            }
             throw lastError || new Error('All Gemini models failed.');
         }
 
