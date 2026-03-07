@@ -24,7 +24,8 @@ async function generateInsight(topic) {
 
         const prompt = `
 あなたは優秀な翻訳家および技術コンサルタントです。
-以下のテックニュースの「タイトル」と「概要」を日本語に自然な表現で翻訳し、さらにソニーのエンジニアが定例ミーティングでワクワクするような鋭い「一言考察（Insight）」を日本語100文字以内で作成してください。
+以下のテックニュースの「タイトル」と「概要」を日本語に自然な表現で翻訳し、さらにソニーのエンジニアが定例ミーティングでワクワクするような鋭い「一言考察（Insight）」を日本語250文字前後で深く作成してください。
+単なる要約ではなく、技術的な意義や将来の展望、エンジニアが議論したくなるような視点を含めてください。
 
 ニュースタイトル: ${topic.title}
 ニュース概要: ${topic.snippet}
@@ -204,10 +205,13 @@ async function sendEmail(attachments, topics) {
             .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 40px; width: 100%; max-width: 1400px; }
             .slide-card { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
             .slide-card img { width: 100%; height: auto; display: block; border-bottom: 1px solid #e2e8f0; }
-            .slide-info { padding: 20px; font-size: 16px; line-height: 1.5; }
-            .slide-info a { color: var(--accent); text-decoration: none; font-weight: bold; }
+            .slide-info { padding: 30px; font-size: 16px; line-height: 1.6; }
+            .slide-info a { color: var(--accent); text-decoration: none; font-size: 1.2rem; font-weight: bold; display: block; margin-bottom: 20px;}
             .slide-info a:hover { text-decoration: underline; }
-            .slide-tag { display: inline-block; font-size: 12px; background: #e2e8f0; padding: 4px 8px; border-radius: 4px; margin-bottom: 8px; font-weight: bold;}
+            .slide-tag { display: inline-block; font-size: 12px; background: var(--accent); color: white; padding: 6px 12px; border-radius: 6px; margin-bottom: 16px; font-weight: bold;}
+            .insight-box { background: #f1f5f9; border-left: 4px solid var(--accent); padding: 20px; border-radius: 0 8px 8px 0; margin-top: 20px; }
+            .insight-label { font-size: 12px; font-weight: bold; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; }
+            .insight-text { font-size: 15px; color: #334155; margin: 0; }
         </style>
     </head>
     <body>
@@ -221,9 +225,12 @@ async function sendEmail(attachments, topics) {
             <div class="slide-card">
                 <!-- <img src="../output/icebreak_slide_${i}.png" alt="Slide ${i}"> -->
                 <div class="slide-info">
-                    <div class="slide-tag">${t.tag}</div><br>
-                    🔗 <a href="${t.link}" target="_blank" rel="noopener noreferrer">${t.title}</a>
-                    <p style="font-size: 14px; color: #64748b; margin-top: 8px;">${t.insight}</p>
+                    <div class="slide-tag">${t.tag}</div>
+                    <a href="${t.link}" target="_blank" rel="noopener noreferrer">🔗 ${t.title}</a>
+                    <div class="insight-box">
+                        <div class="insight-label">Insight</div>
+                        <p class="insight-text">${t.insight}</p>
+                    </div>
                 </div>
             </div>
             `).join('')}
