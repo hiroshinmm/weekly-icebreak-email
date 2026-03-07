@@ -70,15 +70,36 @@ async function generateInsight(topic) {
         try {
             result = await model.generateContent(prompt);
         } catch (e) {
-            console.warn('Fallback to Pro model due to error:', e.message);
-            model = genAI.getGenerativeModel({
-                model: "gemini-1.5-pro",
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: schema
+            // 429レート制限の場合、推奨待機時間を抽出してリトライ
+            if (e.message && e.message.includes('429')) {
+                const retryMatch = e.message.match(/retry in (\d+(\.\d+)?)s/i);
+                const waitSec = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) + 5 : 60;
+                console.warn(`Rate limited (429). Waiting ${waitSec}s before retry...`);
+                await new Promise(resolve => setTimeout(resolve, waitSec * 1000));
+                try {
+                    result = await model.generateContent(prompt);
+                } catch (e2) {
+                    console.warn('Retry failed, falling back to gemini-1.5-flash:', e2.message);
+                    model = genAI.getGenerativeModel({
+                        model: "gemini-1.5-flash",
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: schema
+                        }
+                    });
+                    result = await model.generateContent(prompt);
                 }
-            });
-            result = await model.generateContent(prompt);
+            } else {
+                console.warn('Fallback to gemini-1.5-flash due to error:', e.message);
+                model = genAI.getGenerativeModel({
+                    model: "gemini-1.5-flash",
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: schema
+                    }
+                });
+                result = await model.generateContent(prompt);
+            }
         }
 
         let responseText = result.response.text().trim();
