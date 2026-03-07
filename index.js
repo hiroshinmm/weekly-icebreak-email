@@ -41,7 +41,7 @@ async function generateInsight(topic) {
         const genAI = new GoogleGenerativeAI(apiKey);
         // 現在有効な標準モデル名を使用し、JSONモードとSchemaを強制
         let model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash",
             generationConfig: {
                 responseMimeType: "application/json",
                 responseSchema: schema
@@ -85,7 +85,7 @@ async function generateInsight(topic) {
                     // リトライも失敗 → flash-liteへフォールバック
                     console.warn('Retry failed, falling back to gemini-2.0-flash-lite:', e2.message);
                     model = genAI.getGenerativeModel({
-                        model: "gemini-2.0-flash-lite",
+                        model: "gemini-2.5-flash",
                         generationConfig: { responseMimeType: "application/json", responseSchema: schema }
                     });
                     result = await model.generateContent(prompt);
@@ -98,7 +98,7 @@ async function generateInsight(topic) {
                     console.warn('Fallback to gemini-2.0-flash-lite due to error:', e.message.slice(0, 80));
                 }
                 model = genAI.getGenerativeModel({
-                    model: "gemini-2.0-flash-lite",
+                    model: "gemini-2.5-flash",
                     generationConfig: { responseMimeType: "application/json", responseSchema: schema }
                 });
                 result = await model.generateContent(prompt);
