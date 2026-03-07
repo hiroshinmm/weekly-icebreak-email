@@ -95,6 +95,7 @@ async function generateInsight(topic) {
 
         topic.title = json.translatedTitle || topic.title;
         topic.snippet = json.translatedSnippet || topic.snippet;
+        console.log(`✅ Translated: "${topic.title.slice(0, 30)}..."`);
         return json.insight || 'AIによる考察の生成に失敗しました。ニュース元の情報をご確認ください。';
     } catch (err) {
         console.error('Gemini API Error details:', err);
@@ -162,7 +163,7 @@ async function fetchTopics() {
                             link: item.link,
                             tag: source.category,
                             pubDate: pubDate.toLocaleDateString('ja-JP'),
-                            snippet: cleanSnippet.length > 800 ? cleanSnippet.slice(0, 800) + '...' : cleanSnippet,
+                            snippet: cleanSnippet.length > 200 ? cleanSnippet.slice(0, 200) : cleanSnippet,
                             imageUrl: imageUrl,
                             insight: '最新のトレンドに基づいた考察（自動生成予定）'
                         });
