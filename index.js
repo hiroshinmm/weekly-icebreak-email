@@ -395,7 +395,7 @@ async function generateAllSlideImages(topics) {
                 </div>
                 <div class="content-right" style="position: relative; background: #e2e8f0; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; width: 100%; height: 100%;">
                     ${topic.imageUrl ? `
-                    <img src="${topic.imageUrl}" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1;" onerror="this.style.display='none'; document.getElementById('fallback-${index}').style.display='flex'">
+                    <img src="${topic.imageUrl}" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; background:#fff; z-index:1;" onerror="this.style.display='none'; document.getElementById('fallback-${index}').style.display='flex'">
                     <div id="fallback-${index}" style="position: absolute; display: none; font-size:120px; z-index:0; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; color: #94a3b8;">
                         <span style="font-size:120px; margin-bottom: 20px;">📰</span>
                         <span style="font-size:24px; font-weight: bold;">No Image Available</span>
