@@ -2,21 +2,31 @@
     {
         "category": "SonyAlpha/Imaging",
         "urls": [
-            "https://www.sonyalpharumors.com/feed/"
+            "https://www.sonyalpharumors.com/feed/",
+            "https://dc.watch.impress.co.jp/data/rss/1.0/dcw/feed.rdf",
+            "https://digicame-info.com/rss.xml",
+            "https://capa.getnavi.jp/feed/"
         ],
         "keywords": [
             "sony",
             "alpha",
             "lens",
             "camera",
-            "sensor"
+            "sensor",
+            "ソニー",
+            "カメラ",
+            "レンズ",
+            "α"
         ]
     },
     {
         "category": "Display/TFT",
         "urls": [
             "https://www.tftcentral.co.uk/feed",
-            "https://www.theverge.com/rss/tech/monitors/index.xml"
+            "https://www.theverge.com/rss/tech/monitors/index.xml",
+            "https://rss.itmedia.co.jp/rss/2.0/pcuser.xml",
+            "https://www.4gamer.net/rss/index.xml",
+            "https://ascii.jp/rss.xml"
         ],
         "keywords": [
             "monitor",
@@ -26,7 +36,11 @@
             "oled",
             "led",
             "hz",
-            "resolutions"
+            "resolutions",
+            "モニター",
+            "ディスプレイ",
+            "液晶",
+            "有機EL"
         ]
     },
     {
@@ -34,7 +48,10 @@
         "urls": [
             "https://www.theverge.com/rss/vr-virtual-reality/index.xml",
             "https://www.moguravr.com/feed/",
-            "https://techcrunch.com/category/virtual-reality/feed/"
+            "https://techcrunch.com/category/virtual-reality/feed/",
+            "https://panora.tokyo/feed/",
+            "https://shiropen.com/feed/",
+            "https://xrcloud.jp/blog/feed/"
         ],
         "keywords": [
             "vr",
@@ -45,7 +62,10 @@
             "meta quest",
             "headset",
             "spatial",
-            "メガネ"
+            "メタバース",
+            "仮想現実",
+            "拡張現実",
+            "ホログラム"
         ]
     },
     {
@@ -53,7 +73,10 @@
         "urls": [
             "https://www.theverge.com/rss/gaming/index.xml",
             "https://www.ign.com/rss/articles/feed",
-            "https://kotaku.com/rss"
+            "https://kotaku.com/rss",
+            "https://www.4gamer.net/rss/index.xml",
+            "https://www.famitsu.com/feed/",
+            "https://game.watch.impress.co.jp/data/rss/1.0/gmw/feed.rdf"
         ],
         "keywords": [
             "game",
@@ -63,7 +86,11 @@
             "steam",
             "gpu",
             "rtx",
-            "switch"
+            "switch",
+            "ゲーム",
+            "PS5",
+            "スイッチ",
+            "任天堂"
         ]
     },
     {
@@ -72,7 +99,10 @@
             "https://zenn.dev/feed",
             "https://techcrunch.com/category/artificial-intelligence/feed/",
             "https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml",
-            "https://gizmodo.com/rss"
+            "https://gizmodo.com/rss",
+            "https://automation.watch.impress.co.jp/data/rss/1.0/aiw/feed.rdf",
+            "https://ledge.ai/feed/",
+            "https://ainow.ai/feed/"
         ],
         "keywords": [
             "ai",
@@ -84,8 +114,10 @@
             "developer",
             "software",
             "人工知能",
-            "生成",
-            "copilot"
+            "生成AI",
+            "機械学習",
+            "copilot",
+            "ChatGPT"
         ]
     }
 ]
