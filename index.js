@@ -1,3 +1,8 @@
+const fs = require('fs');
+const path = require('path');
+const Parser = require('rss-parser');
+const puppeteer = require('puppeteer');
+const nodemailer = require('nodemailer');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const parser = new Parser();
