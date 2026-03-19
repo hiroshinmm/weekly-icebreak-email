@@ -6,6 +6,7 @@ async function processNewsImages(topics, outputDir) {
     if (topics.length === 0) return [];
     console.log('Launching browser for image processing...');
     const browser = await puppeteer.launch({
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || (process.platform === 'linux' ? '/usr/bin/google-chrome' : undefined),
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
