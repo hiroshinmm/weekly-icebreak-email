@@ -12,7 +12,7 @@ async function fetchOgImage(articleUrl) {
     try {
         const res = await axios.get(articleUrl, {
             timeout: 5000,
-            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; IceBreakBot/1.0)' }
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
         });
         const $ = cheerio.load(res.data);
         const ogImage = $('meta[property="og:image"]').attr('content')
