@@ -12,7 +12,7 @@ async function generateInsight(topic, apiKey) {
             type: "object",
             properties: {
                 translatedTitle: { type: "string", description: "Japanese translation of the news title" },
-                translatedSnippet: { type: "string", description: "A complete, natural Japanese summary of the news (100-150 characters), not cut off" },
+                translatedSnippet: { type: "string", description: "A complete, natural Japanese summary of the news (around 200 characters), not cut off" },
                 insight: { type: "string", description: "Deep technical insight in Japanese for engineers (around 200 characters)" }
             },
             required: ["translatedTitle", "translatedSnippet", "insight"]
@@ -25,7 +25,7 @@ async function generateInsight(topic, apiKey) {
 
 【出力要件】
 1. ニュースタイトルを、ソニーのエンジニア向けに適切で興味深い日本語に翻訳してください（translatedTitle）。
-2. ニュースの内容を、途中で文章が切れないよう、意味が通る完全な日本語の文章で100〜150文字程度に要約してください（translatedSnippet）。
+2. ニュースの内容を、途中で文章が切れないよう、意味が通る完全な日本語の文章で【200文字程度】に要約してください（translatedSnippet）。
 3. エンジニアがワクワクするような鋭い「一言考察（Insight）」を日本語で【200文字程度】作成してください（insight）。
 
 【Insightに必ず含めるべき観点】

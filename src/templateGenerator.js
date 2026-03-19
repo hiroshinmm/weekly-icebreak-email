@@ -11,14 +11,16 @@ function generateEmailTemplate(topics, pageUrl) {
         const attachmentName = `news_image_${i}.png`;
         return `
                 <div style="margin-bottom: 50px; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <div style="padding: 24px 24px 0 24px;">
+                        <h2 style="margin: 0 0 16px 0; font-size: 20px; line-height: 1.4;">
+                            <a href="${t.link}" style="color: #1e293b; text-decoration: none;">${t.title}</a>
+                        </h2>
+                    </div>
                     <div style="width: 100%;">
                         <img src="cid:${attachmentName}" alt="${t.title}" style="width: 100%; display: block; object-fit: cover;">
                     </div>
                     <div style="padding: 24px;">
-                        <span style="display: inline-block; padding: 4px 10px; background: #003399; color: white; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 12px;">${t.tag}</span>
-                        <h2 style="margin: 0 0 16px 0; font-size: 20px; line-height: 1.4;">
-                            <a href="${t.link}" style="color: #1e293b; text-decoration: none;">${t.title}</a>
-                        </h2>
+                        <span style="display: inline-block; padding: 4px 10px; background: #003399; color: white; border-radius: 4px; font-size: 11px; font-weight: bold; margin-bottom: 12px;">${t.tag}</span>
                         <p style="font-size: 15px; color: #475569; line-height: 1.6; margin-bottom: 20px;">${t.snippet}</p>
                         <div style="background-color: #f1f5f9; border-left: 5px solid #003399; padding: 16px; border-radius: 0 8px 8px 0;">
                             <strong style="color: #003399; font-size: 13px; display: block; margin-bottom: 4px;">💡 AI INSIGHT</strong>
@@ -75,12 +77,14 @@ function generateIndexHtml(topics) {
         <div class="cards">
             ${topics.map((t, i) => `
             <div class="card">
+                <div class="card-body" style="padding-bottom: 0;">
+                    <div class="card-title" style="margin-bottom: 20px;"><a href="${t.link}" target="_blank">${t.title}</a></div>
+                </div>
                 <div class="img-container">
                     <img src="output/news_image_${i}.png" alt="${t.title}" loading="lazy">
                 </div>
-                <div class="card-body">
-                    <div class="tag">${t.tag}</div>
-                    <div class="card-title"><a href="${t.link}" target="_blank">${t.title}</a></div>
+                <div class="card-body" style="padding-top: 24px;">
+                    <div class="tag" style="margin-bottom: 12px;">${t.tag}</div>
                     <div class="card-snippet">${t.snippet}</div>
                     <div class="insight-box">
                         <div class="insight-label">💡 AI INSIGHT</div>
