@@ -1,0 +1,117 @@
+const axios = require('axios');
+const cheerio = require('cheerio');
+const Parser = require('rss-parser');
+const fs = require('fs');
+const path = require('path');
+
+const parser = new Parser();
+
+// OGPから画像を取得するヘルパー関数
+async function fetchOgImage(articleUrl) {
+    if (!articleUrl || articleUrl === '#') return null;
+    try {
+        const res = await axios.get(articleUrl, {
+            timeout: 5000,
+            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; IceBreakBot/1.0)' }
+        });
+        const $ = cheerio.load(res.data);
+        const ogImage = $('meta[property="og:image"]').attr('content')
+            || $('meta[name="twitter:image"]').attr('content');
+        if (ogImage && ogImage.match(/^https?:\/\//i)) {
+            return ogImage;
+        }
+    } catch (e) {
+        // OGP取得失敗は無視
+    }
+    return null;
+}
+
+// ニューストピックス取得メイン関数
+async function fetchTopics(sources) {
+    console.log('Fetching topics from multiple sources...');
+    const allTopics = [];
+    const now = new Date();
+    const tenDaysAgo = new Date(now.getTime() - (10 * 24 * 60 * 60 * 1000));
+
+    for (const source of sources) {
+        for (const url of source.urls) {
+            try {
+                const feed = await parser.parseURL(url);
+                for (const item of feed.items) {
+                    const pubDate = new Date(item.pubDate || item.isoDate);
+
+                    // 日付フィルタリング
+                    if (pubDate < tenDaysAgo) continue;
+
+                    // カテゴリーフィルタリング
+                    const content = (item.title + (item.contentSnippet || '')).toLowerCase();
+                    const isRelevant = source.keywords.some(kw => content.includes(kw.toLowerCase()));
+
+                    if (isRelevant) {
+                        let imageUrl = null;
+                        const possibleImageLocations = [
+                            item.enclosure?.url,
+                            item.content?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
+                            item['content:encoded']?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
+                            item.description?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
+                            item.itunes?.image,
+                            item.image?.url
+                        ];
+
+                        for (const url of possibleImageLocations) {
+                            if (url && url.match(/^https?:\/\//i)) {
+                                if (url.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i) || url.includes('/image') || url.includes('/img') || url.includes('cdn') || url.includes('media')) {
+                                    imageUrl = url;
+                                    break;
+                                }
+                            }
+                        }
+
+                        const cleanSnippet = (item.contentSnippet || item.content || '').replace(/(<([^>]+)>)/gi, "").trim();
+
+                        if (!imageUrl && item.link) {
+                            imageUrl = await fetchOgImage(item.link);
+                        }
+
+                        allTopics.push({
+                            title: item.title,
+                            link: item.link,
+                            tag: source.category,
+                            pubDate: pubDate.toLocaleDateString('ja-JP'),
+                            snippet: cleanSnippet.length > 200 ? cleanSnippet.slice(0, 200) : cleanSnippet,
+                            imageUrl: imageUrl,
+                            insight: ''
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error(`Failed to fetch from ${url}:`, err.message);
+            }
+        }
+    }
+
+    const uniqueTopics = Array.from(new Map(allTopics.map(t => [t.link, t])).values());
+    const finalTopics = [];
+
+    for (const source of sources) {
+        const categoryTopics = uniqueTopics.filter(t => t.tag === source.category);
+        if (categoryTopics.length > 0) {
+            finalTopics.push(categoryTopics[0]);
+        } else {
+            finalTopics.push({
+                title: "今週の最新ニュースはありませんでした",
+                link: "#",
+                tag: source.category,
+                pubDate: "---",
+                snippet: "該当カテゴリの過去10日以内の関連ニュースは見つかりませんでした。",
+                imageUrl: null,
+                insight: "引き続き次回以降のアップデートにご期待ください。"
+            });
+        }
+    }
+
+    console.log(`Aggregated ${finalTopics.length} topics.`);
+    return finalTopics;
+}
+
+module.exports = { fetchTopics };

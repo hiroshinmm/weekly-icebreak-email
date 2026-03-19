@@ -1,478 +1,76 @@
 const fs = require('fs');
 const path = require('path');
-const Parser = require('rss-parser');
-const puppeteer = require('puppeteer');
-const nodemailer = require('nodemailer');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const axios = require('axios');
-const cheerio = require('cheerio');
-
-const parser = new Parser();
-
-// 1. Gemini AI による考察生成
-async function generateInsight(topic) {
-    const configPath = path.join(__dirname, 'config.json');
-    const apiKey = process.env.GEMINI_API_KEY || (fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath)).gemini_api_key : null);
-
-    if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY' || apiKey.includes('dummy')) {
-        console.log('Skipping Insight generation: Gemini API Key is missing or invalid.');
-        return '最新のトレンドに基づいた考察（API設定後に自動生成されます）';
-    }
-
-    try {
-        const schema = {
-            description: "Translated news content and professional insight",
-            type: "object",
-            properties: {
-                translatedTitle: {
-                    type: "string",
-                    description: "Japanese translation of the news title"
-                },
-                translatedSnippet: {
-                    type: "string",
-                    description: "A complete, natural Japanese summary of the news (100-150 characters), not cut off"
-                },
-                insight: {
-                    type: "string",
-                    description: "Deep technical insight in Japanese for engineers (around 200 characters)"
-                }
-            },
-            required: ["translatedTitle", "translatedSnippet", "insight"]
-        };
-
-        const genAI = new GoogleGenerativeAI(apiKey);
-
-        const prompt = `
-あなたは優秀な翻訳家および技術コンサルタントです。
-以下のテックニュースの「タイトル」と「概要」をもとに、プロフェッショナルな日本語コンテンツを作成してください。
-
-【出力要件】
-1. ニュースタイトルを、ソニーのエンジニア向けに適切で興味深い日本語に翻訳してください（translatedTitle）。
-2. ニュースの内容を、途中で文章が切れないよう、意味が通る完全な日本語の文章で100〜150文字程度に要約してください（translatedSnippet）。
-3. エンジニアがワクワクするような鋭い「一言考察（Insight）」を日本語で【200文字程度】作成してください（insight）。
-
-【Insightに必ず含めるべき観点】
-- この技術の背景とトレンドにおける立ち位置
-- 技術的な面白さ、またはビジネス面での破壊的価値
-- エンジニアとして今後どのような議論・アクションを起こすべきか
-
-ニュースタイトル: ${topic.title}
-ニュース概要: ${topic.snippet}
-`;
-
-        // クォータ切れ時に自動的に次のモデルへ切り替えるリスト
-        // 500リクエスト/日ある 3.1-flash-lite を最優先にします
-        const MODEL_LIST = [
-            "gemini-3.1-flash-lite",
-            "gemini-3.0-flash",
-            "gemini-2.5-flash",
-            "gemini-2.5-flash-lite",
-        ];
-
-        const modelConfig = (modelName) => genAI.getGenerativeModel({
-            model: modelName,
-            generationConfig: { responseMimeType: "application/json", responseSchema: schema }
-        });
-
-        let result;
-        let lastError;
-        for (const modelName of MODEL_LIST) {
-            try {
-                console.log(`Trying model: ${modelName}`);
-                const model = modelConfig(modelName);
-                result = await model.generateContent(prompt);
-                break; // 成功したらループを抜ける
-            } catch (e) {
-                const is429 = e.message && e.message.includes('429');
-                const isDayLimit = is429 && e.message.includes('PerDay');
-
-                if (is429 && !isDayLimit) {
-                    // 分間制限 → 少し待ってから同じモデルで再試行
-                    const retryMatch = e.message.match(/retry in (\d+(\.\d+)?)s/i);
-                    const waitSec = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) + 5 : 30;
-                    console.warn(`[${modelName}] Rate limited (per-minute). Waiting ${waitSec}s...`);
-                    await new Promise(resolve => setTimeout(resolve, waitSec * 1000));
-                    try {
-                        const model = modelConfig(modelName);
-                        result = await model.generateContent(prompt);
-                        break;
-                    } catch (e2) {
-                        console.warn(`[${modelName}] Retry failed, trying next model.`);
-                        lastError = e2;
-                    }
-                } else {
-                    // 1日クォータ切れ or 404 → 即次のモデルへ
-                    const reason = isDayLimit ? 'day quota exhausted' : e.message.slice(0, 60);
-                    console.warn(`[${modelName}] Skipping (${reason}), trying next model...`);
-                    lastError = e;
-                }
-            }
-        }
-
-        if (!result) {
-            throw lastError || new Error('All Gemini models failed.');
-        }
-
-        let responseText = result.response.text().trim();
-        // 万が一Markdownタグが含まれていても除去
-        responseText = responseText.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
-
-        let json;
-        try {
-            json = JSON.parse(responseText);
-        } catch (parseErr) {
-            console.error('Failed to parse Gemini JSON. Response was:', responseText);
-            throw parseErr;
-        }
-
-        topic.title = json.translatedTitle || topic.title;
-        topic.snippet = json.translatedSnippet || topic.snippet;
-        console.log(`✅ Translated: "${topic.title.slice(0, 30)}..."`);
-        return json.insight || 'AIによる考察の生成に失敗しました。ニュース元の情報をご確認ください。';
-    } catch (err) {
-        console.error('Gemini API Error details:', err);
-        return `AI考察生成エラー: ${err.message.slice(0, 100)}`;
-    }
-}
-
-// OGPから画像を取得するヘルパー関数
-async function fetchOgImage(articleUrl) {
-    if (!articleUrl || articleUrl === '#') return null;
-    try {
-        const res = await axios.get(articleUrl, {
-            timeout: 5000,
-            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; IceBreakBot/1.0)' }
-        });
-        const $ = cheerio.load(res.data);
-        const ogImage = $('meta[property="og:image"]').attr('content')
-            || $('meta[name="twitter:image"]').attr('content');
-        if (ogImage && ogImage.match(/^https?:\/\//i)) {
-            return ogImage;
-        }
-    } catch (e) {
-        // OGP取得失敗はサイレントに無視
-    }
-    return null;
-}
-
-// ニュースソースの読み込み
-const sourcesPath = path.join(__dirname, 'sources.json');
-let sources = [];
-if (fs.existsSync(sourcesPath)) {
-    sources = JSON.parse(fs.readFileSync(sourcesPath));
-} else {
-    // デフォルトソース (ファイルがない場合)
-    sources = [
-        { category: "OpenSource", urls: ["https://zenn.dev/feed"], keywords: ["js", "ts", "node"] }
-    ];
-}
-
-// 1. RSSアグリゲーター: 複数ソースから最新かつ関連のあるトピックを取得
-async function fetchTopics() {
-    console.log('Fetching topics from multiple sources...');
-    const allTopics = [];
-    const now = new Date();
-    const tenDaysAgo = new Date(now.getTime() - (10 * 24 * 60 * 60 * 1000));
-
-    for (const source of sources) {
-        for (const url of source.urls) {
-            try {
-                const feed = await parser.parseURL(url);
-                for (const item of feed.items) {
-                    const pubDate = new Date(item.pubDate || item.isoDate);
-
-                    // 日付フィルタリング (過去10日以内)
-                    if (pubDate < tenDaysAgo) continue;
-
-                    // カテゴリーフィルタリング
-                    const content = (item.title + (item.contentSnippet || '')).toLowerCase();
-                    const isRelevant = source.keywords.some(kw => content.includes(kw.toLowerCase()));
-
-                    if (isRelevant) {
-                        let imageUrl = null;
-
-                        // 多様なRSSの画像タグからの抽出対応
-                        const possibleImageLocations = [
-                            item.enclosure?.url,
-                            item.content?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
-                            item['content:encoded']?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
-                            item.description?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
-                            item.itunes?.image,
-                            item.image?.url
-                        ];
-
-                        for (const url of possibleImageLocations) {
-                            if (url && url.match(/^https?:\/\//i)) {
-                                // 画像らしいURL（拡張子あり）またはCDN URLを許可
-                                if (url.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i) || url.includes('/image') || url.includes('/img') || url.includes('cdn') || url.includes('media')) {
-                                    imageUrl = url;
-                                    break;
-                                }
-                            }
-                        }
-
-                        const cleanSnippet = (item.contentSnippet || item.content || '').replace(/(<([^>]+)>)/gi, "").trim();
-
-                        // RSSに画像がなければOGPから取得
-                        if (!imageUrl && item.link) {
-                            imageUrl = await fetchOgImage(item.link);
-                        }
-
-                        allTopics.push({
-                            title: item.title,
-                            link: item.link,
-                            tag: source.category,
-                            pubDate: pubDate.toLocaleDateString('ja-JP'),
-                            snippet: cleanSnippet.length > 200 ? cleanSnippet.slice(0, 200) : cleanSnippet,
-                            imageUrl: imageUrl,
-                            insight: '最新のトレンドに基づいた考察（自動生成予定）'
-                        });
-                    }
-                } // /for (const item of feed.items)
-            } catch (err) {
-                console.error(`Failed to fetch from ${url}:`, err.message);
-            }
-        }
-    }
-
-    // 重複削除 (URLが同じもの)
-    const uniqueTopics = Array.from(new Map(allTopics.map(t => [t.link, t])).values());
-
-    // 各カテゴリーごとに必ず1件 (最新のもの) を追加する
-    const finalTopics = [];
-
-    for (const source of sources) {
-        // 現在のカテゴリーに一致する記事を探す
-        const categoryTopics = uniqueTopics.filter(t => t.tag === source.category);
-
-        if (categoryTopics.length > 0) {
-            // 見つかった場合は先頭（最新）を追加
-            finalTopics.push(categoryTopics[0]);
-        } else {
-            // 見つからなかった場合はプレースホルダーを追加
-            finalTopics.push({
-                title: "今週の最新ニュースはありませんでした",
-                link: "#",
-                tag: source.category,
-                pubDate: "---",
-                snippet: "該当カテゴリの過去10日以内の関連ニュースは見つかりませんでした。",
-                imageUrl: null,
-                insight: "引き続き次回以降のアップデートにご期待ください。"
-            });
-        }
-    }
-
-    console.log(`Aggregated ${finalTopics.length} topics.`);
-    return finalTopics;
-}
-
-// 2. ニュース画像のリサイズ・保存処理
-async function processNewsImages(topics) {
-    if (topics.length === 0) return [];
-    console.log('Launching browser for image processing...');
-    const browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-
-    const docsDir = path.join(__dirname, 'docs');
-    if (!fs.existsSync(docsDir)) fs.mkdirSync(docsDir);
-    const outputDir = path.join(docsDir, 'output');
-    if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
-
-    const attachments = await Promise.all(topics.map(async (topic, index) => {
-        console.log(`Processing image ${index}: ${topic.tag}...`);
-        const page = await browser.newPage();
-        // メール幅に合わせた 600px。高さは 16:9 の 338px 程度を目安にする
-        await page.setViewport({ width: 600, height: 338 });
-
-        const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <body style="margin: 0; padding: 0; background-color: #f8fafc; overflow: hidden;">
-            ${topic.imageUrl ? `
-            <div style="width: 600px; height: 338px; position: relative; background: #fff;">
-                <img src="${topic.imageUrl}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; document.getElementById('fallback').style.display='flex';">
-                <div id="fallback" style="display: none; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; color: #94a3b8; font-family: sans-serif;">
-                    <span style="font-size: 80px; margin-bottom: 10px;">📰</span>
-                    <span style="font-size: 18px; font-weight: bold;">No Image Available</span>
-                </div>
-            </div>
-            ` : `
-            <div style="width: 600px; height: 338px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f1f5f9; color: #94a3b8; font-family: sans-serif;">
-                <span style="font-size: 80px; margin-bottom: 10px;">📰</span>
-                <span style="font-size: 18px; font-weight: bold;">No Image Available</span>
-            </div>
-            `}
-        </body>
-        </html>
-        `;
-
-        await page.setContent(htmlContent, { waitUntil: 'networkidle2' });
-        const fileName = `news_image_${index}.png`;
-        const outputPath = path.join(outputDir, fileName);
-
-        await page.screenshot({ path: outputPath });
-        await page.close();
-
-        return { path: outputPath, filename: fileName };
-    }));
-
-    await browser.close();
-    console.log('All images processed successfully.');
-    return attachments;
-}
-
-// 3. メール送信
-async function sendEmail(attachments, topics) {
-    const configPath = path.join(__dirname, 'config.json');
-
-    const user = process.env.GMAIL_USER || (fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath)).email.user : null);
-    const pass = process.env.GMAIL_PASS || (fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath)).email.pass : null);
-    const to = process.env.GMAIL_TO || (fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath)).email.to : null);
-
-    if (!user || !pass || !to) {
-        console.log('Skipping email send: Credentials missing.');
-        return;
-    }
-
-    let transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: { user, pass },
-    });
-
-    const repoName = process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : 'your-repo';
-    const pageUrl = `https://${process.env.GITHUB_REPOSITORY_OWNER || 'your-username'}.github.io/${repoName}/`;
-
-    // ========== 3. Webページ(docs/index.html)の生成を追加 ==========
-    const docsDir = path.join(__dirname, 'docs');
-    if (!fs.existsSync(docsDir)) fs.mkdirSync(docsDir);
-
-    const indexHtml = `
-    <!DOCTYPE html>
-    <html lang="ja">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Weekly Ice Break News</title>
-        <style>
-            :root { --accent: #003399; --bg: #f8fafc; }
-            * { box-sizing: border-box; margin: 0; padding: 0; }
-            body { font-family: -apple-system, 'Noto Sans JP', sans-serif; background: var(--bg); padding: 20px; color: #1e293b; }
-            header { text-align: center; padding: 40px 20px; }
-            h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); color: var(--accent); }
-            header p { color: #64748b; margin-top: 8px; }
-            .cards { display: flex; flex-direction: column; gap: 40px; max-width: 800px; margin: 0 auto; }
-            .card { background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-            .img-container { width: 100%; aspect-ratio: 16/9; overflow: hidden; }
-            .img-container img { width: 100%; height: 100%; object-fit: cover; }
-            .card-body { padding: 32px; }
-            .tag { display: inline-block; background: var(--accent); color: #fff; font-size: 12px; font-weight: bold; padding: 4px 12px; border-radius: 6px; margin-bottom: 16px; }
-            .card-title { font-size: 1.5rem; font-weight: bold; line-height: 1.4; margin-bottom: 16px; }
-            .card-title a { color: inherit; text-decoration: none; }
-            .card-title a:hover { color: var(--accent); }
-            .card-snippet { font-size: 1rem; line-height: 1.7; color: #475569; margin-bottom: 24px; }
-            .insight-box { background: #f1f5f9; border-left: 6px solid var(--accent); padding: 20px 24px; border-radius: 0 12px 12px 0; }
-            .insight-label { font-size: 12px; font-weight: bold; color: var(--accent); margin-bottom: 8px; }
-            .insight-text { font-size: 0.95rem; line-height: 1.7; color: #334155; }
-        </style>
-    </head>
-    <body>
-        <header>
-            <h1>Weekly Ice Break News</h1>
-            <p>エンジニアのための最新テックトレンド</p>
-        </header>
-        <div class="cards">
-            ${topics.map((t, i) => `
-            <div class="card">
-                <div class="img-container">
-                    <img src="output/news_image_${i}.png" alt="${t.title}" loading="lazy">
-                </div>
-                <div class="card-body">
-                    <div class="tag">${t.tag}</div>
-                    <div class="card-title"><a href="${t.link}" target="_blank">${t.title}</a></div>
-                    <div class="card-snippet">${t.snippet}</div>
-                    <div class="insight-box">
-                        <div class="insight-label">💡 AI INSIGHT</div>
-                        <div class="insight-text">${t.insight}</div>
-                    </div>
-                </div>
-            </div>
-            `).join('')}
-        </div>
-    </body>
-    </html>
-    `;
-
-    fs.writeFileSync(path.join(docsDir, 'index.html'), indexHtml);
-    console.log('docs/index.html generated successfully.');
-
-    // HTMLメール本文の組み立て
-    const htmlBody = `
-    <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; background-color: #fff;">
-        <header style="text-align: center; padding: 20px 0;">
-            <h1 style="color: #003399; margin: 0;">Weekly Ice Break</h1>
-            <p style="color: #64748b; font-size: 14px;">エンジニアのための最新テックトレンド</p>
-        </header>
-        
-        <div style="padding: 20px;">
-            ${topics.map((t, i) => {
-        const attachmentName = `news_image_${i}.png`;
-        return `
-                <div style="margin-bottom: 50px; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-                    <div style="width: 100%;">
-                        <img src="cid:${attachmentName}" alt="${t.title}" style="width: 100%; display: block; object-fit: cover;">
-                    </div>
-                    <div style="padding: 24px;">
-                        <span style="display: inline-block; padding: 4px 10px; background: #003399; color: white; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 12px;">${t.tag}</span>
-                        <h2 style="margin: 0 0 16px 0; font-size: 20px; line-height: 1.4;">
-                            <a href="${t.link}" style="color: #1e293b; text-decoration: none;">${t.title}</a>
-                        </h2>
-                        <p style="font-size: 15px; color: #475569; line-height: 1.6; margin-bottom: 20px;">${t.snippet}</p>
-                        <div style="background-color: #f1f5f9; border-left: 5px solid #003399; padding: 16px; border-radius: 0 8px 8px 0;">
-                            <strong style="color: #003399; font-size: 13px; display: block; margin-bottom: 4px;">💡 AI INSIGHT</strong>
-                            <div style="font-size: 14px; color: #334155; line-height: 1.6;">${t.insight}</div>
-                        </div>
-                    </div>
-                </div>
-                `;
-    }).join('')}
-        </div>
-        
-        <footer style="text-align: center; padding: 30px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 12px;">
-            <p>Weekly Ice Break Trends | <a href="${pageUrl}" style="color: #003399;">Webブラウザで見る</a></p>
-        </footer>
-    </div>
-    `;
-
-    await transporter.sendMail({
-        from: `"Weekly Ice Break" <${user}>`,
-        to: to,
-        subject: `[Weekly Ice Break] 最新テックネタ ${topics.length}選`,
-        text: `今週のトレンドニュースを抽出しました。\n\nWebで見る:\n${pageUrl}\n\nトピック一覧:\n${topics.map((t, i) => `${i + 1}. ${t.title}`).join('\n')}`,
-        html: htmlBody,
-        attachments: attachments.map(a => ({ filename: a.filename, path: a.path, cid: a.filename }))
-    });
-}
+const { fetchTopics } = require('./src/newsFetcher');
+const { generateInsight } = require('./src/insightGenerator');
+const { processNewsImages } = require('./src/imageProcessor');
+const { sendEmail } = require('./src/emailService');
+const { generateEmailTemplate, generateIndexHtml } = require('./src/templateGenerator');
 
 async function main() {
-    const topics = await fetchTopics();
+    const configPath = path.join(__dirname, 'config.json');
+    const config = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath)) : {};
+    
+    // APIキーの取得
+    const geminiApiKey = process.env.GEMINI_API_KEY || config.gemini_api_key;
+    
+    // ニュースソースの読み込み
+    const sourcesPath = path.join(__dirname, 'sources.json');
+    let sources = [];
+    if (fs.existsSync(sourcesPath)) {
+        sources = JSON.parse(fs.readFileSync(sourcesPath));
+    } else {
+        sources = [
+            { category: "OpenSource", urls: ["https://zenn.dev/feed"], keywords: ["js", "ts", "node"] }
+        ];
+    }
 
-    // AI考察を全トピックに対して生成 (APIのレートリミット回避のため直列実行し1秒待機)
+    // 1. ニュースの取得
+    const topics = await fetchTopics(sources);
+
+    // 2. AI考察を全トピックに対して生成
     console.log(`Generating AI Insights for ${topics.length} topics...`);
     for (const topic of topics) {
-        topic.insight = await generateInsight(topic);
+        topic.insight = await generateInsight(topic, geminiApiKey);
+        // レートリミット回避のための待機
         await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    // 画像を一括でリサイズ・保存
-    const attachments = await processNewsImages(topics);
+    // 3. 画像のリサイズ・保存
+    const outputDir = path.join(__dirname, 'docs', 'output');
+    const attachments = await processNewsImages(topics, outputDir);
 
-    // 画像がなくても（テストスキップ時など）、トピックがあればメール送信
+    // 4. Webページ (docs/index.html) の生成
+    const docsDir = path.join(__dirname, 'docs');
+    const indexHtml = generateIndexHtml(topics);
+    fs.writeFileSync(path.join(docsDir, 'index.html'), indexHtml);
+    console.log('docs/index.html generated successfully.');
+
+    // 5. メール送信
     if (topics.length > 0) {
-        await sendEmail(attachments, topics);
+        const repoName = process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : 'your-repo';
+        const pageUrl = `https://${process.env.GITHUB_REPOSITORY_OWNER || 'your-username'}.github.io/${repoName}/`;
+        
+        const emailUser = process.env.GMAIL_USER || (config.email ? config.email.user : null);
+        const emailPass = process.env.GMAIL_PASS || (config.email ? config.email.pass : null);
+        const emailTo = process.env.GMAIL_TO || (config.email ? config.email.to : null);
+
+        const htmlBody = generateEmailTemplate(topics, pageUrl);
+        const subject = `[Weekly Ice Break] 最新テックネタ ${topics.length}選`;
+        const text = `今週のトレンドニュースを抽出しました。\n\nWebで見る:\n${pageUrl}`;
+
+        await sendEmail({
+            user: emailUser,
+            pass: emailPass,
+            to: emailTo,
+            subject,
+            text,
+            html: htmlBody,
+            attachments
+        });
     } else {
         console.log('No topics found. Skipping email.');
     }
+
     console.log('Done!');
     process.exit(0);
 }
