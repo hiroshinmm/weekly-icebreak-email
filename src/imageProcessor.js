@@ -15,6 +15,8 @@ async function processNewsImages(topics, outputDir) {
     const attachments = await Promise.all(topics.map(async (topic, index) => {
         console.log(`Processing image ${index}: ${topic.tag}...`);
         const page = await browser.newPage();
+        // Set User-Agent to avoid blocking
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
         await page.setViewport({ width: 600, height: 338 });
 
         const htmlContent = `
@@ -23,7 +25,7 @@ async function processNewsImages(topics, outputDir) {
         <body style="margin: 0; padding: 0; background-color: #f8fafc; overflow: hidden;">
             ${topic.imageUrl ? `
             <div style="width: 600px; height: 338px; position: relative; background: #fff;">
-                <img src="${topic.imageUrl}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; document.getElementById('fallback').style.display='flex';">
+                <img id="news-img" src="${topic.imageUrl}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; document.getElementById('fallback').style.display='flex';">
                 <div id="fallback" style="display: none; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; color: #94a3b8; font-family: sans-serif;">
                     <span style="font-size: 80px; margin-bottom: 10px;">📰</span>
                     <span style="font-size: 18px; font-weight: bold;">No Image Available</span>
@@ -40,6 +42,19 @@ async function processNewsImages(topics, outputDir) {
         `;
 
         await page.setContent(htmlContent, { waitUntil: 'networkidle2' });
+        
+        // Wait specifically for images to load if imageUrl is present
+        if (topic.imageUrl) {
+            try {
+                await page.waitForFunction(() => {
+                    const img = document.getElementById('news-img');
+                    return img && img.complete && img.naturalHeight !== 0;
+                }, { timeout: 10000 });
+            } catch (e) {
+                console.log(`Warning: Image ${index} might not have loaded correctly or timed out.`);
+            }
+        }
+
         const fileName = `news_image_${index}.png`;
         const outputPath = path.join(outputDir, fileName);
 
