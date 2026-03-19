@@ -266,10 +266,10 @@ async function fetchTopics() {
     return finalTopics;
 }
 
-// 2. スライド画像の一括生成 (並列処理による高速化)
-async function generateAllSlideImages(topics) {
+// 2. ニュース画像のリサイズ・保存処理
+async function processNewsImages(topics) {
     if (topics.length === 0) return [];
-    console.log('Launching browser for image generation...');
+    console.log('Launching browser for image processing...');
     const browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
@@ -280,152 +280,45 @@ async function generateAllSlideImages(topics) {
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
 
     const attachments = await Promise.all(topics.map(async (topic, index) => {
-        console.log(`Generating slide image ${index}: ${topic.tag}...`);
+        console.log(`Processing image ${index}: ${topic.tag}...`);
         const page = await browser.newPage();
-        await page.setViewport({ width: 1414, height: 1000 });
+        // メール幅に合わせた 600px。高さは 16:9 の 338px 程度を目安にする
+        await page.setViewport({ width: 600, height: 338 });
 
         const htmlContent = `
         <!DOCTYPE html>
-        <html lang="ja">
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
-                body {
-                    margin: 0;
-                    width: 1414px;
-                    height: 1000px;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                    background-color: #f8fafc;
-                    color: #1e293b;
-                    font-family: 'Inter', 'Noto Sans JP', sans-serif;
-                    overflow: hidden;
-                }
-                .container {
-                    width: 90%;
-                    height: 80%;
-                    display: flex;
-                    background: white;
-                    border-radius: 48px;
-                    overflow: hidden;
-                    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.08);
-                }
-                .content-left {
-                    flex: 1.1;
-                    padding: 60px 80px;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    text-align: left;
-                }
-                .content-right {
-                    flex: 0.9;
-                    background: #f1f5f9;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    padding: 0;
-                    overflow: hidden;
-                    position: relative;
-                }
-                .tag {
-                    display: inline-block;
-                    padding: 6px 18px;
-                    background: #003399;
-                    color: white;
-                    border-radius: 8px;
-                    font-size: 16px;
-                    font-weight: 700;
-                    margin-bottom: 24px;
-                    letter-spacing: 0.05em;
-                }
-                .topic-title {
-                    font-size: 36px;
-                    line-height: 1.3;
-                    margin-bottom: 24px;
-                    font-weight: 700;
-                    color: #0f172a;
-                }
-                .topic-snippet {
-                    font-size: 18px;
-                    line-height: 1.6;
-                    color: #64748b;
-                    margin-bottom: 32px;
-                }
-                .gemini-insight {
-                    background: #f8fafc;
-                    border-left: 6px solid #003399;
-                    padding: 24px 30px;
-                    border-radius: 0 16px 16px 0;
-                    margin-bottom: 30px;
-                }
-                .insight-header {
-                    font-size: 14px;
-                    font-weight: 700;
-                    color: #003399;
-                    margin-bottom: 8px;
-                }
-                .insight-text {
-                    font-size: 17px;
-                    line-height: 1.5;
-                    color: #334155;
-                }
-                .footer-info {
-                    margin-top: auto;
-                    color: #94a3b8;
-                    font-size: 13px;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="content-left">
-                    <div class="tag">${topic.tag}</div>
-                    <div class="topic-title">${topic.title}</div>
-                    <div class="topic-snippet">${topic.snippet}</div>
-                    <div class="gemini-insight">
-                        <div class="insight-header">INSIGHT</div>
-                        <div class="insight-text">${topic.insight}</div>
-                    </div>
-                    <div class="footer-info">
-                        Source: ${topic.tag} | Published: ${topic.pubDate}
-                    </div>
-                </div>
-                <div class="content-right" style="position: relative; background: #e2e8f0; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; width: 100%; height: 100%;">
-                    ${topic.imageUrl ? `
-                    <img src="${topic.imageUrl}" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; background:#fff; z-index:1;" onerror="this.style.display='none'; document.getElementById('fallback-${index}').style.display='flex'">
-                    <div id="fallback-${index}" style="position: absolute; display: none; font-size:120px; z-index:0; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; color: #94a3b8;">
-                        <span style="font-size:120px; margin-bottom: 20px;">📰</span>
-                        <span style="font-size:24px; font-weight: bold;">No Image Available</span>
-                    </div>
-                    ` : `
-                    <div style="display: flex; flex-direction: column; align-items: center; color: #94a3b8;">
-                        <span style="font-size:120px; margin-bottom: 20px;">📰</span>
-                        <span style="font-size:24px; font-weight: bold;">No Image Available</span>
-                    </div>
-                    `}
+        <html>
+        <body style="margin: 0; padding: 0; background-color: #f8fafc; overflow: hidden;">
+            ${topic.imageUrl ? `
+            <div style="width: 600px; height: 338px; position: relative; background: #fff;">
+                <img src="${topic.imageUrl}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; document.getElementById('fallback').style.display='flex';">
+                <div id="fallback" style="display: none; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; color: #94a3b8; font-family: sans-serif;">
+                    <span style="font-size: 80px; margin-bottom: 10px;">📰</span>
+                    <span style="font-size: 18px; font-weight: bold;">No Image Available</span>
                 </div>
             </div>
+            ` : `
+            <div style="width: 600px; height: 338px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f1f5f9; color: #94a3b8; font-family: sans-serif;">
+                <span style="font-size: 80px; margin-bottom: 10px;">📰</span>
+                <span style="font-size: 18px; font-weight: bold;">No Image Available</span>
+            </div>
+            `}
         </body>
         </html>
         `;
 
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-        await page.evaluateHandle('document.fonts.ready');
-        const fileName = `icebreak_slide_${index}.png`;
+        await page.setContent(htmlContent, { waitUntil: 'networkidle2' });
+        const fileName = `news_image_${index}.png`;
         const outputPath = path.join(outputDir, fileName);
 
         await page.screenshot({ path: outputPath });
-        await page.close(); // ページのみ閉じる
+        await page.close();
 
         return { path: outputPath, filename: fileName };
     }));
 
-    await browser.close(); // 全ての処理が終わってからブラウザを閉じる
-    console.log('All images generated successfully.');
+    await browser.close();
+    console.log('All images processed successfully.');
     return attachments;
 }
 
@@ -460,77 +353,52 @@ async function sendEmail(attachments, topics) {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Weekly Ice Break Slides</title>
+        <title>Weekly Ice Break News</title>
         <style>
-            :root { --accent: #003399; --bg: #f0f4ff; }
+            :root { --accent: #003399; --bg: #f8fafc; }
             * { box-sizing: border-box; margin: 0; padding: 0; }
-            body { font-family: -apple-system, 'Noto Sans JP', sans-serif; background: var(--bg); padding: 20px; }
+            body { font-family: -apple-system, 'Noto Sans JP', sans-serif; background: var(--bg); padding: 20px; color: #1e293b; }
             header { text-align: center; padding: 40px 20px; }
             h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); color: var(--accent); }
             header p { color: #64748b; margin-top: 8px; }
-            .cards { display: flex; flex-direction: column; gap: 32px; max-width: 780px; margin: 0 auto; }
-            .card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
-            .card-body { padding: 24px; }
-            .tag { display: inline-block; background: var(--accent); color: #fff; font-size: 12px; font-weight: bold; padding: 4px 12px; border-radius: 6px; margin-bottom: 14px; letter-spacing: 0.05em; }
-            .card-title { font-size: clamp(1rem, 3vw, 1.3rem); font-weight: bold; color: #0f172a; line-height: 1.4; margin-bottom: 12px; }
+            .cards { display: flex; flex-direction: column; gap: 40px; max-width: 800px; margin: 0 auto; }
+            .card { background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+            .img-container { width: 100%; aspect-ratio: 16/9; overflow: hidden; }
+            .img-container img { width: 100%; height: 100%; object-fit: cover; }
+            .card-body { padding: 32px; }
+            .tag { display: inline-block; background: var(--accent); color: #fff; font-size: 12px; font-weight: bold; padding: 4px 12px; border-radius: 6px; margin-bottom: 16px; }
+            .card-title { font-size: 1.5rem; font-weight: bold; line-height: 1.4; margin-bottom: 16px; }
             .card-title a { color: inherit; text-decoration: none; }
-            .card-title a:hover { text-decoration: underline; }
-            .card-snippet { font-size: 14px; line-height: 1.7; color: #475569; margin-bottom: 16px; }
-            .insight-box { background: #f1f5f9; border-left: 4px solid var(--accent); padding: 16px 20px; border-radius: 0 10px 10px 0; }
-            .insight-label { font-size: 11px; font-weight: bold; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 6px; }
-            .insight-text { font-size: 14px; line-height: 1.7; color: #334155; }
-            .slide-img-wrap { padding: 0 0 0 0; cursor: zoom-in; }
-            .slide-img-wrap img { width: 100%; height: auto; display: block; border-top: 1px solid #e2e8f0; }
-            /* ライトボックス */
-            #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
-            #lightbox.open { display: flex; }
-            #lightbox img { max-width: 100%; max-height: 90vh; border-radius: 12px; object-fit: contain; }
-            #lightbox-close { position: fixed; top: 16px; right: 16px; background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 28px; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+            .card-title a:hover { color: var(--accent); }
+            .card-snippet { font-size: 1rem; line-height: 1.7; color: #475569; margin-bottom: 24px; }
+            .insight-box { background: #f1f5f9; border-left: 6px solid var(--accent); padding: 20px 24px; border-radius: 0 12px 12px 0; }
+            .insight-label { font-size: 12px; font-weight: bold; color: var(--accent); margin-bottom: 8px; }
+            .insight-text { font-size: 0.95rem; line-height: 1.7; color: #334155; }
         </style>
     </head>
     <body>
         <header>
-            <h1>Weekly Ice Break Trends</h1>
+            <h1>Weekly Ice Break News</h1>
             <p>エンジニアのための最新テックトレンド</p>
         </header>
-
         <div class="cards">
             ${topics.map((t, i) => `
             <div class="card">
+                <div class="img-container">
+                    <img src="output/news_image_${i}.png" alt="${t.title}" loading="lazy">
+                </div>
                 <div class="card-body">
                     <div class="tag">${t.tag}</div>
-                    <div class="card-title"><a href="${t.link}" target="_blank" rel="noopener noreferrer">${t.title}</a></div>
+                    <div class="card-title"><a href="${t.link}" target="_blank">${t.title}</a></div>
                     <div class="card-snippet">${t.snippet}</div>
                     <div class="insight-box">
-                        <div class="insight-label">💡 INSIGHT</div>
+                        <div class="insight-label">💡 AI INSIGHT</div>
                         <div class="insight-text">${t.insight}</div>
                     </div>
-                </div>
-                <div class="slide-img-wrap" onclick="openLightbox('output/icebreak_slide_${i}.png')">
-                    <img src="output/icebreak_slide_${i}.png" alt="${t.title}" loading="lazy">
                 </div>
             </div>
             `).join('')}
         </div>
-
-        <!-- ライトボックス -->
-        <div id="lightbox" onclick="closeLightbox()">
-            <button id="lightbox-close" onclick="closeLightbox()">✕</button>
-            <img id="lightbox-img" src="" alt="slide">
-        </div>
-
-        <script>
-            function openLightbox(src) {
-                document.getElementById('lightbox-img').src = src;
-                document.getElementById('lightbox').classList.add('open');
-                document.body.style.overflow = 'hidden';
-            }
-            function closeLightbox() {
-                document.getElementById('lightbox').classList.remove('open');
-                document.body.style.overflow = '';
-            }
-            document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
-        </script>
     </body>
     </html>
     `;
@@ -538,40 +406,41 @@ async function sendEmail(attachments, topics) {
     fs.writeFileSync(path.join(docsDir, 'index.html'), indexHtml);
     console.log('docs/index.html generated successfully.');
 
-    // =========================================================
-
     // HTMLメール本文の組み立て
     const htmlBody = `
-    <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #003399; border-bottom: 2px solid #003399; padding-bottom: 10px;">Weekly Ice Break Trends</h2>
-        <p>今週の最新テックトレンドをお届けします。ミーティングのアイスブレイクにご活用ください。</p>
+    <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; background-color: #fff;">
+        <header style="text-align: center; padding: 20px 0;">
+            <h1 style="color: #003399; margin: 0;">Weekly Ice Break</h1>
+            <p style="color: #64748b; font-size: 14px;">エンジニアのための最新テックトレンド</p>
+        </header>
         
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="${pageUrl}" style="background-color: #003399; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Webブラウザで全スライドを見る</a>
-        </div>
-
-        <h3 style="margin-top: 40px;">📝 今週のトピック一覧</h3>
-        <ul style="list-style-type: none; padding-left: 0;">
+        <div style="padding: 20px;">
             ${topics.map((t, i) => {
-        const attachmentName = `icebreak_slide_${i}.png`;
+        const attachmentName = `news_image_${i}.png`;
         return `
-                <li style="margin-bottom: 40px; padding: 20px; background-color: #f8fafc; border-radius: 12px; border-left: 6px solid #003399; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                    <span style="display: inline-block; padding: 4px 10px; background: #003399; color: white; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 10px;">${t.tag}</span><br>
-                    <a href="${t.link}" style="font-size: 18px; font-weight: bold; color: #1e293b; text-decoration: none;">${t.title}</a>
-                    <div style="font-size: 14px; color: #475569; margin-top: 10px; line-height: 1.6;">${t.snippet}</div>
-                    <div style="font-size: 15px; color: #1e293b; margin-top: 15px; padding: 15px; background: #e2e8f0; border-radius: 8px;"><strong>💡 Insight:</strong><br>${t.insight}</div>
-                    <div style="margin-top: 20px; text-align: center;">
-                        <img src="cid:${attachmentName}" alt="Slide ${i}" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px; border: 1px solid #cbd5e1;">
+                <div style="margin-bottom: 50px; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <div style="width: 100%;">
+                        <img src="cid:${attachmentName}" alt="${t.title}" style="width: 100%; display: block; object-fit: cover;">
                     </div>
-                </li>
+                    <div style="padding: 24px;">
+                        <span style="display: inline-block; padding: 4px 10px; background: #003399; color: white; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 12px;">${t.tag}</span>
+                        <h2 style="margin: 0 0 16px 0; font-size: 20px; line-height: 1.4;">
+                            <a href="${t.link}" style="color: #1e293b; text-decoration: none;">${t.title}</a>
+                        </h2>
+                        <p style="font-size: 15px; color: #475569; line-height: 1.6; margin-bottom: 20px;">${t.snippet}</p>
+                        <div style="background-color: #f1f5f9; border-left: 5px solid #003399; padding: 16px; border-radius: 0 8px 8px 0;">
+                            <strong style="color: #003399; font-size: 13px; display: block; margin-bottom: 4px;">💡 AI INSIGHT</strong>
+                            <div style="font-size: 14px; color: #334155; line-height: 1.6;">${t.insight}</div>
+                        </div>
+                    </div>
+                </div>
                 `;
     }).join('')}
-        </ul>
+        </div>
         
-        <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 40px;">
-            This email is automatically generated by Weekly Ice Break Automation.<br>
-            Attached are ${attachments.length} high-resolution slides for your presentation.
-        </p>
+        <footer style="text-align: center; padding: 30px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 12px;">
+            <p>Weekly Ice Break Trends | <a href="${pageUrl}" style="color: #003399;">Webブラウザで見る</a></p>
+        </footer>
     </div>
     `;
 
@@ -579,7 +448,7 @@ async function sendEmail(attachments, topics) {
         from: `"Weekly Ice Break" <${user}>`,
         to: to,
         subject: `[Weekly Ice Break] 最新テックネタ ${topics.length}選`,
-        text: `今週のトレンドスライドを生成しました。\n\nWebで見る:\n${pageUrl}\n\nトピック一覧:\n${topics.map((t, i) => `${i + 1}. ${t.title}`).join('\n')}`,
+        text: `今週のトレンドニュースを抽出しました。\n\nWebで見る:\n${pageUrl}\n\nトピック一覧:\n${topics.map((t, i) => `${i + 1}. ${t.title}`).join('\n')}`,
         html: htmlBody,
         attachments: attachments.map(a => ({ filename: a.filename, path: a.path, cid: a.filename }))
     });
@@ -595,8 +464,8 @@ async function main() {
         await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    // 画像を一括で生成 (1回のブラウザ起動で完結)
-    const attachments = await generateAllSlideImages(topics);
+    // 画像を一括でリサイズ・保存
+    const attachments = await processNewsImages(topics);
 
     // 画像がなくても（テストスキップ時など）、トピックがあればメール送信
     if (topics.length > 0) {
