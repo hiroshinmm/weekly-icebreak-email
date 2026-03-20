@@ -21,10 +21,29 @@ async function processNewsImages(topics, outputDir) {
         const isDummy = topic.link === '#' || topic.title.includes('今週の最新ニュースはありませんでした');
         if (isDummy) return null;
 
-        // 画像URLがない場合は共通のフォールバックアセットを使用
+        // 画像URLがない場合は動的に横長のプレースホルダを生成
         if (!topic.imageUrl) {
-            const fallbackPath = path.join(__dirname, '..', 'dist', 'assets', 'fallback.png');
-            return { path: fallbackPath, filename: 'fallback.png', cid: `news_image_${index}` };
+            const fileName = `fallback_${index}.png`;
+            const outputPath = path.join(outputDir, fileName);
+            const page = await browser.newPage();
+            await page.setViewport({ width: 600, height: 160 }); // ちょっと薄めの横長
+            
+            const fallbackHtml = `
+            <!DOCTYPE html>
+            <html>
+            <body style="margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 160px; background-color: #f1f5f9; color: #94a3b8; font-family: sans-serif;">
+                <div style="text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold; letter-spacing: 2px;">NO IMAGE</div>
+                    <div style="font-size: 12px; margin-top: 4px; opacity: 0.7;">Icebreak Email</div>
+                </div>
+            </body>
+            </html>
+            `;
+            await page.setContent(fallbackHtml);
+            await page.screenshot({ path: outputPath });
+            await page.close();
+            
+            return { path: outputPath, filename: fileName, cid: `news_image_${index}` };
         }
 
         console.log(`Processing image ${index}: ${topic.tag}...`);
@@ -53,9 +72,25 @@ async function processNewsImages(topics, outputDir) {
             }, { timeout: 10000 });
         } catch (e) {
             console.log(`Warning: Image ${index} might not have loaded correctly. Using fallback.`);
-            const fallbackPath = path.join(__dirname, '..', 'dist', 'assets', 'fallback.png');
+            const fileName = `fallback_${index}.png`;
+            const outputPath = path.join(outputDir, fileName);
+            // 現在のページを使ってプレースホルダを生成
+            await page.setViewport({ width: 600, height: 160 });
+            const fallbackHtml = `
+            <!DOCTYPE html>
+            <html>
+            <body style="margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 160px; background-color: #f1f5f9; color: #94a3b8; font-family: sans-serif;">
+                <div style="text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold; letter-spacing: 2px;">NO IMAGE</div>
+                    <div style="font-size: 12px; margin-top: 4px; opacity: 0.7;">Icebreak Email</div>
+                </div>
+            </body>
+            </html>
+            `;
+            await page.setContent(fallbackHtml);
+            await page.screenshot({ path: outputPath });
             await page.close();
-            return { path: fallbackPath, filename: 'fallback.png', cid: `news_image_${index}` };
+            return { path: outputPath, filename: fileName, cid: `news_image_${index}` };
         }
 
         const fileName = `news_image_${index}.png`;
