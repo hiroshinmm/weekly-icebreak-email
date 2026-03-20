@@ -12,7 +12,7 @@ async function sendEmail({ user, pass, to, subject, text, html, attachments }) {
     });
 
     await transporter.sendMail({
-        from: `"Weekly Ice Break" <${user}>`,
+        from: `"Icebreak Email" <${user}>`,
         to,
         subject,
         text,

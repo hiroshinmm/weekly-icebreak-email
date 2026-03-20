@@ -2,8 +2,8 @@ function generateEmailTemplate(topics, pageUrl) {
     return `
     <div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #1e293b; max-width: 600px; margin: 0 auto; background-color: #f8fafc; padding: 40px 20px;">
         <header style="text-align: center; margin-bottom: 40px;">
-            <img src="cid:logo" alt="Weekly Ice Break Logo" style="width: 80px; height: 80px; margin-bottom: 20px;">
-            <h1 style="color: #003399; margin: 0; font-size: 28px; letter-spacing: -0.5px;">Weekly Ice Break</h1>
+            <img src="cid:logo" alt="Icebreak Email Logo" style="width: 80px; height: 80px; margin-bottom: 20px;">
+            <h1 style="color: #003399; margin: 0; font-size: 28px; letter-spacing: -0.5px;">Icebreak Email</h1>
             <p style="color: #64748b; font-size: 14px; margin-top: 8px;">エンジニアのための最新テックトレンド</p>
         </header>
         
@@ -43,7 +43,7 @@ function generateEmailTemplate(topics, pageUrl) {
     }).join('')}
         
         <footer style="text-align: center; padding: 40px 0 20px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 12px;">
-            <p style="margin-bottom: 10px;">Weekly Ice Break Trends</p>
+            <p style="margin-bottom: 10px;">Icebreak Email Trends</p>
             <a href="${pageUrl}" style="color: #003399; text-decoration: none; font-weight: 600;">Webブラウザで全アーカイブを見る &rarr;</a>
         </footer>
     </div>
@@ -57,7 +57,7 @@ function generateIndexHtml(topics) {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Weekly Ice Break News</title>
+        <title>Icebreak Email News</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
@@ -152,8 +152,8 @@ function generateIndexHtml(topics) {
     </head>
     <body>
         <header>
-            <img src="assets/logo.png" alt="Weekly Ice Break Logo" class="header-logo">
-            <h1>Weekly Ice Break</h1>
+            <img src="assets/logo.png" alt="Icebreak Email Logo" class="header-logo">
+            <h1>Icebreak Email</h1>
             <p>エンジニアのための最新テックトレンド</p>
         </header>
         <div class="cards">
@@ -181,7 +181,7 @@ function generateIndexHtml(topics) {
             `).join('')}
         </div>
         <footer style="text-align: center; margin-top: 80px; color: var(--text-muted); font-size: 0.9rem;">
-            &copy; 2026 Weekly Ice Break Trends
+            &copy; 2026 Icebreak Email Trends
         </footer>
     </body>
     </html>

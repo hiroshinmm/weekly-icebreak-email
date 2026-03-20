@@ -53,7 +53,7 @@ async function main() {
         const emailTo = process.env.GMAIL_TO || (config.email ? config.email.to : null);
 
         const htmlBody = generateEmailTemplate(topics, pageUrl);
-        const subject = `[Weekly Ice Break] 最新テックネタ ${topics.length}選`;
+        const subject = `[Icebreak Email] 最新テックネタ ${topics.length}選`;
         const text = `今週のトレンドニュースを抽出しました。\n\nWebで見る:\n${pageUrl}`;
 
         // ロゴをアタッチメントに追加
