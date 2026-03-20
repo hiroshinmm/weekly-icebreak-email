@@ -95,8 +95,21 @@ function generateIndexHtml(topics) {
             .card-title a { color: inherit; text-decoration: none; transition: color 0.2s; }
             .card-title a:hover { color: var(--accent); }
 
-            .img-container { width: 100%; aspect-ratio: 16/9; overflow: hidden; background: #e2e8f0; }
-            .img-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+            .img-container { 
+                width: 100%; 
+                aspect-ratio: 16/9; 
+                overflow: hidden; 
+                background: #f8fafc; 
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .img-container img { 
+                max-width: 100%; 
+                max-height: 100%; 
+                object-fit: contain; 
+                transition: transform 0.5s ease; 
+            }
             .card:hover .img-container img { transform: scale(1.03); }
 
             .card-body { padding: 32px 40px 40px 40px; }
