@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Samples - Icebreak Email</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 40px;
+            background-color: #f0f2f5;
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            color: #1a1a1a;
+        }
+
+        h1 { text-align: center; margin-bottom: 60px; color: #003399; }
+        .sample-container { max-width: 600px; margin: 0 auto 100px auto; }
+        .sample-label { font-weight: bold; margin-bottom: 20px; font-size: 1.2rem; color: #444; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+
+        /* Common dummy content */
+        .title { margin: 0 0 16px 0; font-size: 22px; line-height: 1.4; }
+        .img-wrap { width: 100%; aspect-ratio: 16/9; background: #ddd; margin-bottom: 20px; overflow: hidden; }
+        .img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .snippet { font-size: 15px; line-height: 1.8; margin-bottom: 24px; }
+        .insight-box { padding: 20px; border-radius: 12px; }
+        .insight-label { font-size: 12px; font-weight: bold; margin-bottom: 8px; display: block; }
+        .insight-text { font-size: 14px; line-height: 1.6; }
+
+        /* Pattern 1: Clean Minimal */
+        .minimal { background: white; padding: 32px; border: 1px solid #eaeaea; border-radius: 0; }
+        .minimal .title { font-weight: 400; color: #000; }
+        .minimal .insight-box { background: #f9f9f9; border-top: 1px solid #eee; border-radius: 0; }
+        .minimal .insight-label { color: #888; text-transform: uppercase; letter-spacing: 0.1em; }
+
+        /* Pattern 2: Sony Premium (Dark Navy) */
+        .sony { background: #001a4d; color: #fff; padding: 32px; border-radius: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .sony .title { color: #fff; border-left: 4px solid #0055ff; padding-left: 15px; }
+        .sony .snippet { color: #cbd5e1; }
+        .sony .insight-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+        .sony .insight-label { color: #0088ff; }
+
+        /* Pattern 3: Modern Card (Glassmorphism) */
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); padding: 32px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .glass .title { font-weight: 700; color: #1e293b; }
+        .glass .img-wrap { border-radius: 16px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .glass .insight-box { background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%); border-radius: 16px; border: 1px solid #e0e7ff; }
+        .glass .insight-label { color: #003399; }
+
+        /* Pattern 4: Tech Magazine (Bold) */
+        .magazine { background: #fff; padding: 32px; border: 4px solid #1a1a1a; box-shadow: 12px 12px 0 #003399; }
+        .magazine .title { font-size: 28px; font-weight: 900; text-transform: uppercase; background: #ffff00; display: inline-block; padding: 0 5px; margin-bottom: 20px; }
+        .magazine .insight-box { background: #1a1a1a; color: #fff; border-radius: 0; }
+        .magazine .insight-label { color: #ffff00; }
+
+        /* Pattern 5: Futuristic (Glow) */
+        .future { background: #0f172a; color: #f8fafc; padding: 32px; border-radius: 20px; border: 1px solid #1e293b; }
+        .future .title { background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; }
+        .future .img-wrap { border: 1px solid #334155; }
+        .future .insight-box { border: 1px solid #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); background: rgba(15, 23, 42, 0.8); }
+        .future .insight-label { color: #38bdf8; text-shadow: 0 0 5px rgba(56, 189, 248, 0.5); }
+    </style>
+</head>
+<body>
+    <h1>Icebreak Email - Design Samples</h1>
+
+    <div class="sample-container">
+        <div class="sample-label">1. Clean Minimal (清潔感・可読性重視)</div>
+        <div class="minimal">
+            <h2 class="title">大規模言語モデルの推論コストを90%削減する新しい量子化手法</h2>
+            <div class="img-wrap"><img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=800&q=80"></div>
+            <p class="snippet">最新の研究によると、精度をほぼ維持したままモデルサイズを劇的に縮小できる手法が確立されました。これにより、エッジデバイスでの高速な推論が可能になり、クラウドコストの大幅な削減が期待できます。実装はオープンソースで公開されており、既存のフレームワークにも統合可能です。</p>
+            <div class="insight-box">
+                <span class="insight-label">💡 AI Insight</span>
+                <div class="insight-text">この手法は、単なる圧縮技術を超えて、LLMの民主化を加速させる破壊的な一歩です。特にローカル環境での開発効率が劇的に向上するでしょう。</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sample-container">
+        <div class="sample-label">2. Sony Premium (信頼感・重厚感)</div>
+        <div class="sony">
+            <h2 class="title">次世代イメージセンサー技術：120fpsの超高速HDR撮影を実現</h2>
+            <div class="img-wrap"><img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80"></div>
+            <p class="snippet">新しい積層型構造により、読み出し速度が従来比で2倍に向上しました。これにより、動きの激しいシーンでもゴーストのない鮮明なHDR映像を記録することが可能です。プロフェッショナル向けカメラからスマートフォンまで、幅広い応用が見込まれています。</p>
+            <div class="insight-box">
+                <span class="insight-label">💡 AI Insight</span>
+                <div class="insight-text">ハードウェアの進化がソフトウェアの限界を押し広げています。高速伝送路の設計や、膨大なデータを処理するISP側のアルゴリズム最適化が次の鍵となるでしょう。</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sample-container">
+        <div class="sample-label">3. Modern Card (親しみやすさ・トレンド)</div>
+        <div class="glass">
+            <h2 class="title">TypeScript 5.4 発表：NoInfer型の導入と推論の改善</h2>
+            <div class="img-wrap"><img src="https://images.unsplash.com/photo-1516116216624-53e697fedbea?auto=format&fit=crop&w=800&q=80"></div>
+            <p class="snippet">待望の NoInfer ユーティリティ型が追加され、複雑なジェネリック関数の型推論を開発者がより細かく制御できるようになりました。また、テンプレートリテラル型の制約緩和など、開発体験を向上させる多くの改善が含まれています。モダンなフロントエンド開発において必須のアップデートです。</p>
+            <div class="insight-box">
+                <span class="insight-label">💡 AI Insight</span>
+                <div class="insight-text">型システムの進化は、静的解析によるバグ抑止力をさらに高めます。NoInferの活用により、ライブラリ設計の柔軟性が格段に増すでしょう。</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sample-container">
+        <div class="sample-label">4. Tech Magazine (インパクト・ニュース性)</div>
+        <div class="magazine">
+            <h2 class="title">WebAssembly がサーバーサイドの勢力図を書き換える</h2>
+            <div class="img-wrap"><img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80"></div>
+            <p class="snippet">コンテナに代わる軽量な実行環境としてWasmへの注目が急増しています。起動速度がミリ秒単位であり、メモリーフットプリントも極めて小さいため、サーバーレスコンピューティングのコスト効率を圧倒的に高めます。主要なクラウドベンダーも対応を加速させています。</p>
+            <div class="insight-box">
+                <span class="insight-label">💡 AI Insight</span>
+                <div class="insight-text">Dockerの生みの親が語った「2008年にWasmがあればDockerは不要だった」という言葉が現実味を帯びています。ポータビリティの新しい標準です。</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sample-container">
+        <div class="sample-label">5. Futuristic (先進性・テック感)</div>
+        <div class="future">
+            <h2 class="title">量子コンピュータ実用化へのカウントダウン</h2>
+            <div class="img-wrap"><img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80"></div>
+            <p class="snippet">エラー訂正技術の飛躍的な進歩により、実用的な論理量子ビットの構築が射程圏内に入ってきました。複雑な分子シミュレーションや、既存の暗号体系を脅かす計算能力が、数年以内にクラウド経由で提供される可能性があります。エンジニアは今から備えるべきです。</p>
+            <div class="insight-box">
+                <span class="insight-label">💡 AI Insight</span>
+                <div class="insight-text">従来のバイナリコンピューティングの常識が通用しない世界が来ます。量子アルゴリズムへの理解は、将来のエンジニアにとって究極の差別化要因になるでしょう。</div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
