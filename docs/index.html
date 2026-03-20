@@ -5,121 +5,194 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Weekly Ice Break News</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
         <style>
-            :root { --accent: #003399; --bg: #f8fafc; }
+            :root {
+                --accent: #003399;
+                --text-main: #1e293b;
+                --text-muted: #64748b;
+                --bg: #f8fafc;
+                --card-bg: #ffffff;
+            }
             * { box-sizing: border-box; margin: 0; padding: 0; }
-            body { font-family: -apple-system, 'Noto Sans JP', sans-serif; background: var(--bg); padding: 20px; color: #1e293b; }
-            header { text-align: center; padding: 40px 20px; }
-            h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); color: var(--accent); }
-            header p { color: #64748b; margin-top: 8px; }
-            .cards { display: flex; flex-direction: column; gap: 40px; max-width: 800px; margin: 0 auto; }
-            .card { background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-            .img-container { width: 100%; aspect-ratio: 16/9; overflow: hidden; }
-            .img-container img { width: 100%; height: 100%; object-fit: cover; }
-            .card-body { padding: 32px; }
-            .tag { display: inline-block; background: var(--accent); color: #fff; font-size: 12px; font-weight: bold; padding: 4px 12px; border-radius: 6px; margin-bottom: 16px; }
-            .card-title { font-size: 1.5rem; font-weight: bold; line-height: 1.4; margin-bottom: 16px; }
-            .card-title a { color: inherit; text-decoration: none; }
+            body {
+                font-family: 'Inter', 'Noto Sans JP', -apple-system, sans-serif;
+                background: var(--bg);
+                color: var(--text-main);
+                line-height: 1.6;
+                padding: 40px 20px;
+            }
+            header { text-align: center; padding: 60px 0; max-width: 800px; margin: 0 auto; }
+            h1 { font-size: 3rem; font-weight: 900; color: var(--accent); letter-spacing: -0.02em; margin-bottom: 12px; }
+            header p { font-size: 1.1rem; color: var(--text-muted); }
+
+            .cards { display: grid; grid-template-columns: 1fr; gap: 60px; max-width: 800px; margin: 0 auto; }
+            .card {
+                background: var(--card-bg);
+                border-radius: 32px;
+                overflow: hidden;
+                box-shadow: 0 20px 50px rgba(0,0,0,0.06);
+                transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+                border: 1px solid rgba(0,0,0,0.02);
+            }
+            .card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+            }
+            
+            .card-header { padding: 40px 40px 24px 40px; }
+            .card-title { font-size: 1.75rem; font-weight: 800; line-height: 1.4; }
+            .card-title a { color: inherit; text-decoration: none; transition: color 0.2s; }
             .card-title a:hover { color: var(--accent); }
-            .card-snippet { font-size: 1rem; line-height: 1.7; color: #475569; margin-bottom: 24px; }
-            .insight-box { background: #f1f5f9; border-left: 6px solid var(--accent); padding: 20px 24px; border-radius: 0 12px 12px 0; }
-            .insight-label { font-size: 12px; font-weight: bold; color: var(--accent); margin-bottom: 8px; }
-            .insight-text { font-size: 0.95rem; line-height: 1.7; color: #334155; }
+
+            .img-container { 
+                width: 100%; 
+                aspect-ratio: 16/9; 
+                overflow: hidden; 
+                background: #f8fafc; 
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .img-container img { 
+                max-width: 100%; 
+                max-height: 100%; 
+                object-fit: contain; 
+                transition: transform 0.5s ease; 
+            }
+            .card:hover .img-container img { transform: scale(1.03); }
+
+            .card-body { padding: 32px 40px 40px 40px; }
+            .tag {
+                display: inline-block;
+                background: #e0e7ff;
+                color: var(--accent);
+                font-size: 0.75rem;
+                font-weight: 800;
+                padding: 6px 14px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+            .card-snippet { font-size: 1.05rem; line-height: 1.8; color: #475569; margin-bottom: 32px; }
+
+            .insight-box {
+                background: #f1f5f9;
+                border-left: 6px solid var(--accent);
+                padding: 24px 30px;
+                border-radius: 0 20px 20px 0;
+            }
+            .insight-label { font-size: 0.8rem; font-weight: 900; color: var(--accent); margin-bottom: 10px; letter-spacing: 0.1em; }
+            .insight-text { font-size: 1rem; line-height: 1.8; color: #334155; }
+
+            @media (max-width: 600px) {
+                h1 { font-size: 2.2rem; }
+                .card-header { padding: 32px 24px 20px 24px; }
+                .card-title { font-size: 1.4rem; }
+                .card-body { padding: 24px 24px 32px 24px; }
+                .insight-box { padding: 20px 24px; }
+            }
         </style>
     </head>
     <body>
         <header>
-            <h1>Weekly Ice Break News</h1>
+            <h1>Weekly Ice Break</h1>
             <p>エンジニアのための最新テックトレンド</p>
         </header>
         <div class="cards">
             
-            <div class="card">
-                <div class="card-body" style="padding-bottom: 0;">
-                    <div class="card-title" style="margin-bottom: 20px;"><a href="https://www.sonyalpharumors.com/today-only-430-off-on-the-sigma-28mm-f-1-4-at-bh/" target="_blank">シグマ 28mm F1.4 FEレンズ、BHで本日限定430ドル割引 – Eマウント市場の動向を読み解く</a></div>
+            <article class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><a href="https://www.sonyalpharumors.com/today-only-430-off-on-the-sigma-28mm-f-1-4-at-bh/" target="_blank">本日限定：Sigma 28mm f/1.4レンズがBHphotoで430ドルオフ</a></h2>
                 </div>
                 <div class="img-container">
-                    <img src="output/news_image_0.png" alt="シグマ 28mm F1.4 FEレンズ、BHで本日限定430ドル割引 – Eマウント市場の動向を読み解く" loading="lazy">
+                    <img src="output/news_image_0.png" alt="本日限定：Sigma 28mm f/1.4レンズがBHphotoで430ドルオフ" loading="lazy">
                 </div>
-                <div class="card-body" style="padding-top: 24px;">
-                    <div class="tag" style="margin-bottom: 12px;">SonyAlpha/Imaging</div>
-                    <div class="card-snippet">本日限定で、BHphotoにてシグマの高性能レンズ「28mm F1.4 DG HSM Art (FEマウント用)」が430ドルの大幅割引で提供されています。このセールでは、レンズだけでなくPelican製ケースやGitzo製三脚なども特別価格で入手可能です。また、ソニー製品にも新たな割引が適用されていることが示唆されており、写真愛好家やプロにとって見逃せない機会となっています。</div>
+                <div class="card-body">
+                    <div class="tag">SonyAlpha/Imaging</div>
+                    <p class="card-snippet">BHphotoでは本日限定で、Sigma 28mm f/1.4 FEレンズが430ドル割引となるセールを実施中です。PelicanケースやGitzo三脚なども大幅割引となっています。ソニー関連製品の割引も引き続き実施中です。この機会に高性能レンズやアクセサリーをお得に手に入れましょう。</p>
                     <div class="insight-box">
                         <div class="insight-label">💡 AI INSIGHT</div>
-                        <div class="insight-text">Eマウント用シグマArtレンズの大幅割引は、サードパーティ製高性能レンズの市場浸透と価格競争の激化を示唆。ソニーのエンジニアは、純正レンズの光学差別化、AF連携含むシステム最適化を急ぎ、Eマウントエコシステム全体の魅力を高める次世代のレンズ・カメラ開発戦略を喫緊に議論すべきです。</div>
+                        <div class="insight-text">単なるレンズセールではない。28mm f/1.4という広角大口径レンズは、風景、スナップ、ポートレートまで汎用性が高く、低価格化は市場への強力な布石。デジタル化で画質競争は激化、スマホカメラの進化も著しい中、こうした高品質・高性能な単焦点レンズの存在感は増す。エンジニアとしては、このレンズの光学設計思想や、AF性能、そしてBHphotoのような販売チャネル戦略との連携から、次世代カメラ体験のあり方を考察すべきだろう。</div>
                     </div>
                 </div>
-            </div>
+            </article>
             
-            <div class="card">
-                <div class="card-body" style="padding-bottom: 0;">
-                    <div class="card-title" style="margin-bottom: 20px;"><a href="https://tftcentral.co.uk/best-settings/msi-mpg-341cqr-x36-2" target="_blank">MSI MPG 341CQR X36: SDR/HDR設定、OLEDケア、ゲーミングオプション完全ガイド</a></div>
+            <article class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><a href="https://tftcentral.co.uk/best-settings/msi-mpg-341cqr-x36-2" target="_blank">MSI MPG 341CQR X36: 最適設定ガイドでゲーム体験を向上</a></h2>
                 </div>
                 <div class="img-container">
-                    <img src="output/news_image_1.png" alt="MSI MPG 341CQR X36: SDR/HDR設定、OLEDケア、ゲーミングオプション完全ガイド" loading="lazy">
+                    <img src="output/news_image_1.png" alt="MSI MPG 341CQR X36: 最適設定ガイドでゲーム体験を向上" loading="lazy">
                 </div>
-                <div class="card-body" style="padding-top: 24px;">
-                    <div class="tag" style="margin-bottom: 12px;">Display/TFT</div>
-                    <div class="card-snippet">MSI MPG 341CQR X36モニターの最適な設定を見つけましょう。このガイド動画では、SDRおよびHDRモードの設定、OLEDパネルのケア方法、ゲームプレイに最適なオプションについて詳しく解説します。画質を最大限に引き出すための包括的な情報を提供します。</div>
+                <div class="card-body">
+                    <div class="tag">Display/TFT</div>
+                    <p class="card-snippet">MSI MPG 341CQR X36モニターの最適な設定方法を解説するガイド動画。SDR/HDRモード、OLEDケア、ゲーミングオプションまで網羅し、ユーザーが最高の視覚体験を得られるようにサポートします。TFTCentralによる詳細なレビューです。</p>
                     <div class="insight-box">
                         <div class="insight-label">💡 AI INSIGHT</div>
-                        <div class="insight-text">34インチ曲面ウルトラワイド3440x1440、480Hz QD-OLEDというモンスター級スペックのMSI MPG 341CQR X36。ミングラフィックスの勢いが加速する中、ゲーミングモニターはもはや単なる表示デバイスではなく、体験を没入させるプラットフォームへと進化。このモニターは、その進化の最前線に立つ。QD-OLEDの応答速度と色彩表現、そして480Hzの滑らかさは、eスポーツはもちろん、クリエイティブワークにも新たな地平を拓く可能性を秘める。エンジニアとしては、この超高性能パネルのポテンシャルを最大限に引き出すためのファームウェア最適化、GPUとの連携、さらには次世代ディスプレイ技術への応用可能性について、今すぐ議論を開始すべきだろう。画質設定の最適化は、技術の真価を引き出す第一歩に過ぎない。</div>
+                        <div class="insight-text">湾曲OLEDゲーミングモニターMSI MPG 341CQR X36は、高リフレッシュレートとHDR表示で没入感ある体験を提供。GPU性能向上とDLSS等の普及が、高画質モニターの普及を後押しするトレンド。エンジニアとしては、このモニターの高速応答性と色再現性の限界を探り、次世代ゲーム体験に向けた表示技術の進化と、それに伴うコンテンツ制作・最適化について議論を深めるべきでしょう。</div>
                     </div>
                 </div>
-            </div>
+            </article>
             
-            <div class="card">
-                <div class="card-body" style="padding-bottom: 0;">
-                    <div class="card-title" style="margin-bottom: 20px;"><a href="https://www.theverge.com/report/896820/lina-khan-ftc-meta-supernatural-antitrust" target="_blank">Lina Khan氏の先見性は正しかった</a></div>
+            <article class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><a href="https://www.theverge.com/report/896820/lina-khan-ftc-meta-supernatural-antitrust" target="_blank">Lina Khan氏の先見性は正しかった</a></h2>
                 </div>
                 <div class="img-container">
                     <img src="output/news_image_2.png" alt="Lina Khan氏の先見性は正しかった" loading="lazy">
                 </div>
-                <div class="card-body" style="padding-top: 24px;">
-                    <div class="tag" style="margin-bottom: 12px;">XR/Spatial</div>
-                    <div class="card-snippet">2021年、コロナ禍で仮想空間（メタバース）がインターネットの未来として注目を集めていた。しかし、その後の技術トレンドの変化により、メタバースへの過剰な期待は落ち着きを見せている。こうした状況で、当時から独占禁止法（反トラスト法）の厳格な適用を主張していたLina Khan氏の洞察が再評価されている。</div>
+                <div class="card-body">
+                    <div class="tag">XR/Spatial</div>
+                    <p class="card-snippet">2021年、パンデミックによる巣ごもり需要でメタバースがインターネットの未来として注目されました。しかし、その後の急速な技術進化や市場の変化により、仮想空間への熱狂は冷めつつあります。このような状況を踏まえ、当時アンチ・トラスト法（反トラスト法）の改正を主張していたLina Khan氏の先見性が再評価されています。</p>
                     <div class="insight-box">
                         <div class="insight-label">💡 AI INSIGHT</div>
-                        <div class="insight-text">メタバースブームの終焉は、技術の「過熱」と「実用性」の乖離を示唆。Khan氏の視点は、技術トレンドに踊らされず、競争法や市場構造の視点からイノベーションを評価する重要性を再認識させる。エンジニアは、単なる流行追随ではなく、技術がもたらす社会的・経済的影響、特に市場競争への影響を考慮した開発・提案を行うべきだ。長期的な視点での技術評価と、健全な市場形成への貢献が求められる。</div>
+                        <div class="insight-text">メタバースブームの終焉は、技術的実現性とビジネスモデルの乖離を示唆。GAFAMの独占的地位への懸念からアンチ・トラスト法改正を主張したLina Khan氏の視点は、プラットフォーム経済の功罪を的確に捉えていたと言える。今後は、技術の健全な発展と公正な競争環境の維持のため、アルゴリズムの透明性確保やデータポリティクスの規制強化といった、より踏み込んだ議論と具体的な技術的・法制度的アプローチが求められる。</div>
                     </div>
                 </div>
-            </div>
+            </article>
             
-            <div class="card">
-                <div class="card-body" style="padding-bottom: 0;">
-                    <div class="card-title" style="margin-bottom: 20px;"><a href="https://www.itmedia.co.jp/pcuser/articles/2603/19/news089.html" target="_blank">CORSAIR、マグネット着脱可能な横長14.5型タッチ液晶「XENEON EDGE」に新色2種が登場</a></div>
+            <article class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><a href="https://www.itmedia.co.jp/pcuser/articles/2603/19/news089.html" target="_blank">CORSAIR、マグネット着脱可能な横長14.5型タッチ液晶「XENEON EDGE」に新色2種が登場</a></h2>
                 </div>
                 <div class="img-container">
                     <img src="output/news_image_3.png" alt="CORSAIR、マグネット着脱可能な横長14.5型タッチ液晶「XENEON EDGE」に新色2種が登場" loading="lazy">
                 </div>
-                <div class="card-body" style="padding-top: 24px;">
-                    <div class="tag" style="margin-bottom: 12px;">Gaming/Hardware</div>
-                    <div class="card-snippet">アスクは、CORSAIR製の横長14.5型タッチ液晶ディスプレイ「XENEON EDGE」に、新たに2色のカラーバリエーションモデルを追加しました。このディスプレイは、マグネットでの取り付けも可能で、PCのサブモニターやクリエイティブ作業、プレゼンテーションなど、多様な用途に対応します。</div>
+                <div class="card-body">
+                    <div class="tag">Gaming/Hardware</div>
+                    <p class="card-snippet">アスクは、CORSAIR製横長14.5型タッチ液晶ディスプレイ「XENEON EDGE」の新色として、ブラックとホワイトの2モデルを発表しました。このディスプレイは、マグネットによる着脱機構を備えたスタンドが特徴で、PCのセカンドディスプレイやタブレットのような用途にも柔軟に対応します。クリエイティブ作業からエンターテイメントまで、幅広いニーズに応える多機能性が魅力です。</p>
                     <div class="insight-box">
                         <div class="insight-label">💡 AI INSIGHT</div>
-                        <div class="insight-text">PC周辺機器のトレンドとして、多機能化・パーソナライズ化が進む中、CORSAIR XENEON EDGEは、マグネット着脱というユニークなギミックとタッチ対応で、次世代のインターフェースとして注目すべき存在。特に、ゲーミング用途だけでなく、クリエイターやビジネスパーソンへの訴求力は高く、UX向上に貢献する可能性。今後は、ソフトウェア連携による拡張性や、他デバイスとのエコシステム構築が鍵となるだろう。エンジニアとしては、こうした新しいインタラクションをどう活用し、既存のワークフローを革新できるか、具体的なユースケースを提案したい。</div>
+                        <div class="insight-text">PC周辺機器におけるタッチインターフェースの進化と、マルチデバイス連携の加速というトレンドの中で、CORSAIR XENEON EDGEはユニークな位置を占める。マグネット着脱式スタンドによる設置自由度の高さは、従来のセカンドディスプレイの概念を覆し、UI/UXデザインの新たな可能性を示唆する。この柔軟性は、AR/VRコンテンツとの連携や、カスタムUIを持つ産業機器への応用など、エンジニアが探求すべき領域を広げる。今後は、ハードウェアのポテンシャルを最大限に引き出すソフトウェア連携や、より洗練されたインタラクションデザインについて議論を深めるべきだろう。</div>
                     </div>
                 </div>
-            </div>
+            </article>
             
-            <div class="card">
-                <div class="card-body" style="padding-bottom: 0;">
-                    <div class="card-title" style="margin-bottom: 20px;"><a href="https://zenn.dev/tsubotax/articles/7fe5f02061ccb9" target="_blank">Claude CodeとGitHubでプロダクトマネジメントを再定義する</a></div>
+            <article class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><a href="https://zenn.dev/tsubotax/articles/7fe5f02061ccb9" target="_blank">Claude Code × GitHubでプロダクトマネジメントを再設計：クラシル事例</a></h2>
                 </div>
                 <div class="img-container">
-                    <img src="output/news_image_4.png" alt="Claude CodeとGitHubでプロダクトマネジメントを再定義する" loading="lazy">
+                    <img src="output/news_image_4.png" alt="Claude Code × GitHubでプロダクトマネジメントを再設計：クラシル事例" loading="lazy">
                 </div>
-                <div class="card-body" style="padding-top: 24px;">
-                    <div class="tag" style="margin-bottom: 12px;">AI/Software</div>
-                    <div class="card-snippet">クラシルのプロダクト開発では、Claude CodeとGitHubを連携させ、競合調査から仮説検証、UIプロトタイプ作成までの一連のプロダクトマネジメントワークを単一のGitリポジトリに集約する新手法を確立しました。Claude Codeによる構造化、レビュー、集計機能がPdMワークフローを劇的に効率化し、開発プロセスに変革をもたらしました。</div>
+                <div class="card-body">
+                    <div class="tag">AI/Software</div>
+                    <p class="card-snippet">クラシルのプロダクト開発では、Claude CodeとGitHubを連携させ、競合調査から仮説検証、UIプロトタイプ作成までの一連のプロダクトマネジメントワークを単一のGitリポジトリに集約しました。Claude Codeによる構造化、レビュー、集計を通じて、PdM業務の効率化と質的向上を実現した事例の振り返りです。特に4つの施策で大きな効果がありました。</p>
                     <div class="insight-box">
                         <div class="insight-label">💡 AI INSIGHT</div>
-                        <div class="insight-text">生成AIとバージョン管理システム（VCS）の融合は、プロダクトマネジメントのあり方を根本から変えつつあります。競合分析、要件定義、プロトタイピングといった創造的かつ反復的なプロセスをVCS上で一元管理し、AIによるレビュー・集計を行うことで、開発サイクルの高速化と品質向上が期待できます。これは、まさに「プロダクト開発のCI/CD」とも呼べる革新であり、エンジニアはAIとの協働による新たなPdMプラクティスの確立と、その効果測定・改善に注力すべきでしょう。</div>
+                        <div class="insight-text">「競合調査→仮説→プロトタイプ」をGitリポジトリで一元管理するアプローチは、プロダクト開発における「ドキュメントのサイロ化」と「認識齟齬」という長年の課題に対する有望な解決策となり得ます。Claude Codeの進化は、AIによるPdM支援の可能性を広げ、開発プロセスの大幅な効率化と迅速なイテレーションを可能にします。エンジニアとしては、AIを活用した開発プロセス変革の可能性を探求し、具体的なツール選定と導入効果の検証を進めるべきでしょう。</div>
                     </div>
                 </div>
-            </div>
+            </article>
             
         </div>
+        <footer style="text-align: center; margin-top: 80px; color: var(--text-muted); font-size: 0.9rem;">
+            &copy; 2026 Weekly Ice Break Trends
+        </footer>
     </body>
     </html>
     
