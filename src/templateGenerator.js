@@ -21,7 +21,7 @@ function generateEmailTemplate(topics, pageUrl) {
                 ${(t.link !== '#' && !t.title.includes('今週の最新ニュースはありませんでした')) ? `
                 <div style="width: 100%; overflow: hidden; background-color: #f8fafc; text-align: center;">
                     <a href="${t.link}" style="display: block; width: 100%;">
-                        <img src="cid:${t.imageUrl ? `news_image_${i}.png` : `no_image_${i}`}" alt="${t.title}" style="width: 100%; display: block;">
+                        <img src="cid:news_image_${i}" alt="${t.title}" style="width: 100%; display: block;">
                     </a>
                 </div>
                 ` : ''}
