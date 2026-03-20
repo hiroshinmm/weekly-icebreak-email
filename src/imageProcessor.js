@@ -24,7 +24,7 @@ async function processNewsImages(topics, outputDir) {
         // 画像URLがない場合は共通のフォールバックアセットを使用
         if (!topic.imageUrl) {
             const fallbackPath = path.join(__dirname, '..', 'dist', 'assets', 'fallback.png');
-            return { path: fallbackPath, filename: 'fallback.png', cid: `no_image_${index}` };
+            return { path: fallbackPath, filename: 'fallback.png', cid: `news_image_${index}` };
         }
 
         console.log(`Processing image ${index}: ${topic.tag}...`);
@@ -55,7 +55,7 @@ async function processNewsImages(topics, outputDir) {
             console.log(`Warning: Image ${index} might not have loaded correctly. Using fallback.`);
             const fallbackPath = path.join(__dirname, '..', 'dist', 'assets', 'fallback.png');
             await page.close();
-            return { path: fallbackPath, filename: 'fallback.png', cid: `no_image_${index}` };
+            return { path: fallbackPath, filename: 'fallback.png', cid: `news_image_${index}` };
         }
 
         const fileName = `news_image_${index}.png`;
@@ -64,7 +64,7 @@ async function processNewsImages(topics, outputDir) {
         await page.screenshot({ path: outputPath });
         await page.close();
 
-        return { path: outputPath, filename: fileName, cid: fileName };
+        return { path: outputPath, filename: fileName, cid: `news_image_${index}` };
     }));
 
     await browser.close();
