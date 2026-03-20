@@ -18,7 +18,9 @@ async function processNewsImages(topics, outputDir) {
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
     const results = await Promise.all(topics.map(async (topic, index) => {
-        if (topic.link === '#' || topic.title.includes('今週の最新ニュースはありませんでした')) return null;
+        const isDummy = topic.link === '#' || topic.title.includes('今週の最新ニュースはありませんでした');
+        if (isDummy) return null;
+
         console.log(`Processing image ${index}: ${topic.tag}...`);
         const page = await browser.newPage();
         // Set User-Agent to avoid blocking
@@ -57,17 +59,17 @@ async function processNewsImages(topics, outputDir) {
                     return img && img.complete && img.naturalHeight !== 0;
                 }, { timeout: 10000 });
             } catch (e) {
-                console.log(`Warning: Image ${index} might not have loaded correctly or timed out.`);
+                console.log(`Warning: Image ${index} might not have loaded correctly.`);
             }
         }
 
-        const fileName = `news_image_${index}.png`;
+        const fileName = topic.imageUrl ? `news_image_${index}.png` : `no_image_available_${index}.png`;
         const outputPath = path.join(outputDir, fileName);
 
         await page.screenshot({ path: outputPath });
         await page.close();
 
-        return { path: outputPath, filename: fileName, cid: `news_image_${index}.png` };
+        return { path: outputPath, filename: fileName, cid: fileName };
     }));
 
     await browser.close();

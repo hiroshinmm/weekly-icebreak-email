@@ -21,7 +21,7 @@ function generateEmailTemplate(topics, pageUrl) {
                 ${(t.link !== '#' && !t.title.includes('今週の最新ニュースはありませんでした')) ? `
                 <div style="width: 100%; overflow: hidden; background-color: #f8fafc; text-align: center;">
                     <a href="${t.link}" style="display: block; width: 100%;">
-                        <img src="cid:news_image_${i}.png" alt="${t.title}" style="width: 100%; display: block;">
+                        <img src="cid:${t.imageUrl ? `news_image_${i}.png` : `no_image_available_${i}.png`}" alt="${t.title}" style="width: 100%; display: block;">
                     </a>
                 </div>
                 ` : ''}
@@ -163,7 +163,7 @@ function generateIndexHtml(topics) {
                 ${(t.link !== '#' && !t.title.includes('今週の最新ニュースはありませんでした')) ? `
                 <div class="img-container">
                     <a href="${t.link}" target="_blank" style="display: block; width: 100%; height: 100%;">
-                        <img src="output/news_image_${i}.png" alt="${t.title}" loading="lazy">
+                        <img src="output/${t.imageUrl ? `news_image_${i}.png` : `no_image_available_${i}.png`}" alt="${t.title}" loading="lazy">
                     </a>
                 </div>
                 ` : ''}
