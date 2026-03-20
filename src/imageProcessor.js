@@ -18,7 +18,7 @@ async function processNewsImages(topics, outputDir) {
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
     const results = await Promise.all(topics.map(async (topic, index) => {
-        if (!topic.imageUrl) return null;
+        if (topic.link === '#' || topic.title.includes('今週の最新ニュースはありませんでした')) return null;
         console.log(`Processing image ${index}: ${topic.tag}...`);
         const page = await browser.newPage();
         // Set User-Agent to avoid blocking
