@@ -44,7 +44,7 @@
 
 ## 5. インフラストラクチャ
 - **GitHub Actions (`.github/workflows/icebreak_email.yml`)**:
-  - `cron: '0 0 * * *'` (毎日 09:00 JST 頃) に自動実行。
+  - `cron: '0 3 * * *'` (毎日 12:00 JST 頃) に自動実行。
   - 成果物を自動的にリポジトリへコミットし、GitHub Pages へのデプロイをトリガーする。
 
 ## 6. 特記事項: `dist/output/` フォルダの役割
