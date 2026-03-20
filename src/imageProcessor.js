@@ -31,15 +31,13 @@ async function processNewsImages(topics, outputDir) {
         const page = await browser.newPage();
         // Set User-Agent to avoid blocking
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-        await page.setViewport({ width: 600, height: 338 });
+        await page.setViewport({ width: 800, height: 100 });
 
         const htmlContent = `
         <!DOCTYPE html>
         <html>
-        <body style="margin: 0; padding: 0; background-color: #f8fafc; overflow: hidden;">
-            <div style="width: 600px; height: 338px; position: relative; background: #f8fafc; display: flex; justify-content: center; align-items: center;">
-                <img id="news-img" src="${topic.imageUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-            </div>
+        <body style="margin: 0; padding: 0;">
+            <img id="news-img" src="${topic.imageUrl}" style="width: 800px; height: auto; display: block;">
         </body>
         </html>
         `;
@@ -58,10 +56,11 @@ async function processNewsImages(topics, outputDir) {
             return { path: fallbackPath, filename: 'fallback.png', cid: `news_image_${index}` };
         }
 
+        const body = await page.$('body');
         const fileName = `news_image_${index}.png`;
         const outputPath = path.join(outputDir, fileName);
 
-        await page.screenshot({ path: outputPath });
+        await body.screenshot({ path: outputPath });
         await page.close();
 
         return { path: outputPath, filename: fileName, cid: `news_image_${index}` };

@@ -9,17 +9,16 @@ function generateEmailTemplate(topics, pageUrl) {
         ${topics.map((t, i) => {
         const attachmentName = `news_image_${i}.png`;
         return `
-            <div style="margin-bottom: 60px; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
                 <!-- Title Section -->
-                <div style="padding: 32px 32px 24px 32px;">
+                <div style="padding: 32px 32px 8px 32px;">
                     <h2 style="margin: 0; font-size: 22px; line-height: 1.4; font-weight: 700;">
                         <a href="${t.link}" style="color: #1e293b; text-decoration: none;">${t.title}</a>
                     </h2>
                 </div>
-                
+
                 <!-- Image Section -->
                 ${(t.link !== '#' && !t.title.includes('今週の最新ニュースはありませんでした')) ? `
-                <div style="width: 100%; overflow: hidden; background-color: #f8fafc; text-align: center;">
+                <div style="width: 100%; overflow: hidden; background-color: #ffffff; text-align: center; line-height: 0; margin-top: 0;">
                     <a href="${t.link}" style="display: block; width: 100%;">
                         <img src="cid:news_image_${i}" alt="${t.title}" style="width: 100%; display: block;">
                     </a>
@@ -156,9 +155,6 @@ function generateIndexHtml(topics) {
         <div class="cards">
             ${topics.map((t, i) => `
             <article class="card">
-                <div class="card-header">
-                    <h2 class="card-title"><a href="${t.link}" target="_blank">${t.title}</a></h2>
-                </div>
                 ${(t.link !== '#' && !t.title.includes('今週の最新ニュースはありませんでした')) ? `
                 <div class="img-container">
                     <a href="${t.link}" target="_blank" style="display: block; width: 100%; height: 100%;">
@@ -166,6 +162,9 @@ function generateIndexHtml(topics) {
                     </a>
                 </div>
                 ` : ''}
+                <div class="card-header">
+                    <h2 class="card-title"><a href="${t.link}" target="_blank">${t.title}</a></h2>
+                </div>
                 <div class="card-body">
                     <div class="tag">${t.tag}</div>
                     <p class="card-snippet">${t.snippet}</p>
