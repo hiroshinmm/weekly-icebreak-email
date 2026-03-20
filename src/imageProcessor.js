@@ -17,7 +17,8 @@ async function processNewsImages(topics, outputDir) {
 
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
-    const attachments = await Promise.all(topics.map(async (topic, index) => {
+    const results = await Promise.all(topics.map(async (topic, index) => {
+        if (!topic.imageUrl) return null;
         console.log(`Processing image ${index}: ${topic.tag}...`);
         const page = await browser.newPage();
         // Set User-Agent to avoid blocking
@@ -66,12 +67,12 @@ async function processNewsImages(topics, outputDir) {
         await page.screenshot({ path: outputPath });
         await page.close();
 
-        return { path: outputPath, filename: fileName };
+        return { path: outputPath, filename: fileName, cid: `news_image_${index}.png` };
     }));
 
     await browser.close();
     console.log('All images processed successfully.');
-    return attachments;
+    return results.filter(a => a !== null);
 }
 
 module.exports = { processNewsImages };

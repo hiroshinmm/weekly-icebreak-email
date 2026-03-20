@@ -19,9 +19,9 @@ function generateEmailTemplate(topics, pageUrl) {
                 
                 <!-- Image Section -->
                 ${t.imageUrl ? `
-                <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; background-color: #f8fafc; text-align: center;">
-                    <a href="${t.link}" style="display: block; width: 100%; height: 100%;">
-                        <img src="cid:${attachmentName}" alt="${t.title}" style="max-width: 100%; max-height: 100%; display: inline-block; object-fit: contain;">
+                <div style="width: 100%; overflow: hidden; background-color: #f8fafc; text-align: center;">
+                    <a href="${t.link}" style="display: block; width: 100%;">
+                        <img src="cid:news_image_${i}.png" alt="${t.title}" style="width: 100%; display: block;">
                     </a>
                 </div>
                 ` : ''}
@@ -101,17 +101,17 @@ function generateIndexHtml(topics) {
 
             .img-container { 
                 width: 100%; 
-                aspect-ratio: 16/9; 
                 overflow: hidden; 
                 background: #f8fafc; 
                 display: flex;
                 justify-content: center;
                 align-items: center;
+                border-bottom: 1px solid rgba(0,0,0,0.02);
             }
             .img-container img { 
-                max-width: 100%; 
-                max-height: 100%; 
-                object-fit: contain; 
+                width: 100%; 
+                height: auto; 
+                display: block;
                 transition: transform 0.5s ease; 
             }
             .card:hover .img-container img { transform: scale(1.03); }
