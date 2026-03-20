@@ -28,12 +28,10 @@ async function main() {
     const topics = await fetchTopics(sources);
 
     // 2. AI考察を全トピックに対して生成
-    console.log(`Generating AI Insights for ${topics.length} topics...`);
-    for (const topic of topics) {
+    console.log(`Generating AI Insights for ${topics.length} topics in parallel...`);
+    await Promise.all(topics.map(async (topic) => {
         topic.insight = await generateInsight(topic, geminiApiKey);
-        // 待機時間を短縮 (1s -> 0.8s)
-        await new Promise(resolve => setTimeout(resolve, 800));
-    }
+    }));
 
     // 3. 画像のリサイズ・保存
     const outputDir = path.join(__dirname, 'docs', 'output');

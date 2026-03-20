@@ -50,8 +50,8 @@ async function fetchTopics(sources) {
 
     // 並列でソースを取得
     const sourcePromises = sources.map(async (source) => {
-        const sourceTopics = [];
-        for (const url of source.urls) {
+        const urlFetchPromises = source.urls.map(async (url) => {
+            const urlTopics = [];
             try {
                 const feed = await parser.parseURL(url);
                 for (const item of feed.items) {
@@ -98,7 +98,7 @@ async function fetchTopics(sources) {
                             imageUrl = await fetchOgImage(item.link);
                         }
 
-                        sourceTopics.push({
+                        urlTopics.push({
                             title: item.title,
                             link: item.link,
                             tag: source.category,
@@ -112,8 +112,11 @@ async function fetchTopics(sources) {
             } catch (err) {
                 console.error(`Failed to fetch from ${url}:`, err.message);
             }
-        }
-        return sourceTopics;
+            return urlTopics;
+        });
+
+        const results = await Promise.all(urlFetchPromises);
+        return results.flat();
     });
 
     const results = await Promise.all(sourcePromises);
