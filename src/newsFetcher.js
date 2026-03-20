@@ -49,17 +49,16 @@ async function fetchTopics(sources) {
     const now = new Date();
     const tenDaysAgo = new Date(now.getTime() - (10 * 24 * 60 * 60 * 1000));
 
-    for (const source of sources) {
+    // 並列でソースを取得
+    const sourcePromises = sources.map(async (source) => {
+        const sourceTopics = [];
         for (const url of source.urls) {
             try {
                 const feed = await parser.parseURL(url);
                 for (const item of feed.items) {
                     const pubDate = new Date(item.pubDate || item.isoDate);
-
-                    // 日付フィルタリング
                     if (pubDate < tenDaysAgo) continue;
 
-                    // カテゴリーフィルタリング
                     const content = (item.title + (item.contentSnippet || '')).toLowerCase();
                     const isRelevant = source.keywords.some(kw => content.includes(kw.toLowerCase()));
 
@@ -88,12 +87,10 @@ async function fetchTopics(sources) {
                             }
                         }
 
-                        // YouTube URL から直接サムネイルを推測するフォールバック
+                        // YouTube フォールバック
                         if (!imageUrl && item.link && item.link.includes('youtube.com/watch')) {
                             const videoId = item.link.match(/v=([^&]+)/)?.[1];
-                            if (videoId) {
-                                imageUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
-                            }
+                            if (videoId) imageUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
                         }
 
                         const cleanSnippet = (item.contentSnippet || item.content || '').replace(/(<([^>]+)>)/gi, "").trim();
@@ -102,7 +99,7 @@ async function fetchTopics(sources) {
                             imageUrl = await fetchOgImage(item.link);
                         }
 
-                        allTopics.push({
+                        sourceTopics.push({
                             title: item.title,
                             link: item.link,
                             tag: source.category,
@@ -117,7 +114,11 @@ async function fetchTopics(sources) {
                 console.error(`Failed to fetch from ${url}:`, err.message);
             }
         }
-    }
+        return sourceTopics;
+    });
+
+    const results = await Promise.all(sourcePromises);
+    const allTopics = results.flat();
 
     const uniqueTopics = Array.from(new Map(allTopics.map(t => [t.link, t])).values());
     const finalTopics = [];

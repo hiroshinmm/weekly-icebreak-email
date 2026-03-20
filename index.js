@@ -31,8 +31,8 @@ async function main() {
     console.log(`Generating AI Insights for ${topics.length} topics...`);
     for (const topic of topics) {
         topic.insight = await generateInsight(topic, geminiApiKey);
-        // レートリミット回避のための待機
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // 待機時間を短縮 (1s -> 0.8s)
+        await new Promise(resolve => setTimeout(resolve, 800));
     }
 
     // 3. 画像のリサイズ・保存
