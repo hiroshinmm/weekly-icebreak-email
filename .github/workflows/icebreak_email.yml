@@ -1,4 +1,4 @@
-name: Weekly Icebreak Automation
+name: Icebreak Email Automation
 
 on:
   push:

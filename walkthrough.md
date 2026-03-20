@@ -14,12 +14,12 @@
 
 ## 確認手順
 1.  **画像の確認**:
-    - [icebreak_slide.png](file:///C:/Users/hiros/OneDrive/デスクトップ/Antigravity/HighYield/weekly-icebreak-email/icebreak_slide.png) を開き、デザインに問題がないか確認してください。
+    - [icebreak_slide.png](file:///C:/Users/hiros/OneDrive/デスクトップ/Antigravity/HighYield/icebreak-email/icebreak_slide.png) を開き、デザインに問題がないか確認してください。
 2.  **メール設定**:
-    - [config.json](file:///C:/Users/hiros/OneDrive/デスクトップ/Antigravity/HighYield/weekly-icebreak-email/config.json) を開き、自身の SMTP 情報（Gmailなど）と宛先メールアドレスを入力してください。
+    - [config.json](file:///C:/Users/hiros/OneDrive/デスクトップ/Antigravity/HighYield/icebreak-email/config.json) を開き、自身の SMTP 情報（Gmailなど）と宛先メールアドレスを入力してください。
     - テスト実行: `node index.js` をターミナルで叩き、自分にメールが届けば成功です。
 3.  **自動化**:
     - `PowerShell` を管理者権限で開き、`register_task.ps1` を実行すると、毎週月曜の朝に自動でスライドが届くようになります。
 
 ---
-![生成されたスライドのプレビュー](file:///C:/Users/hiros/OneDrive/デスクトップ/Antigravity/HighYield/weekly-icebreak-email/icebreak_slide.png)
+![生成されたスライドのプレビュー](file:///C:/Users/hiros/OneDrive/デスクトップ/Antigravity/HighYield/icebreak-email/icebreak_slide.png)
