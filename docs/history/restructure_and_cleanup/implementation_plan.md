@@ -1,48 +1,40 @@
-# 実装計画: プロジェクト構造の刷新 (Public と Docs の分離)
+# 実装計画: プロジェクト名変更と構造刷新 (Icebreak Email)
 
-「コード」「公開用サイト」「ドキュメント」を明確に分離し、モダンなウェブプロジェクトの標準的な構成（Daily Tech Briefing 風）を採用します。
+リポジトリ名を `icebreak-email` に変更し、全体の構造をモダンなウェブプロジェクト構成へと刷新しました。
 
 ## 新しいディレクトリ構成
 
 ```
 ├── config/            (設定ファイル: config.json, sources.json)
-├── public/            (GitHub Pages / 公開用サイト)
-│   ├── assets/        (静的アセット: ロゴ、共通画像)
-│   ├── output/        (生成されたニュース画像)
-│   └── index.html     (メインページ)
-├── docs/              (プロジェクトドキュメント / 非公開)
-│   ├── history/       (過去のタスクログ・設計履歴)
+├── dist/              (GitHub Pages / 公開用サイト成果物)
+│   ├── assets/        (ロゴ、フォールバック画像)
+│   ├── output/        (自動生成ニュース画像)
+│   └── index.html     (メインサイト)
+├── docs/              (プロジェクトドキュメント / 管理用)
+│   ├── history/       (過去のタスクログ、設計履歴)
 │   ├── design_specification.md
 │   └── requirements_specification.md
 ├── src/               (ソースコード)
 └── index.js           (エントリーポイント)
 ```
 
-## 変更内容
+## 実施した変更内容
 
-### [1. ディレクトリの再編]
+### [1. リポジトリ名の変更対応]
+- **Git Remote**: `icebreak-email.git` へ URL を更新。
+- **ファイル名の変更**: `.github/workflows/weekly_icebreak.yml` → `icebreak_email.yml`
+- **コード内の名称変更**: `package.json`, `package-lock.json`, 設計・要求仕様書内の名称を一括更新。
 
-- **`public/` の作成**: ウェブサイトとして公開するコンテンツをここに集約します。
-- **`docs/` の整理**: `index.html` や画像フォルダを `public/` へ移動し、`docs/` は純粋なドキュメント保管場所とします。
+### [2. ディレクトリの再編]
+- **`dist/` の導入**: 公開用コンテンツを `docs/` から `dist/` へ移動し、GitHub Pages のデプロイ元を更新。
+- **`docs/` の整理**: ドキュメント専用とし、過去の開発ログは `history/` 以下にアーカイブ。
 
-### [2. ソースコードの修正]
+### [3. 自動化設定の更新]
+- **GitHub Actions**: コミットメッセージを `build: update icebreak slides [skip ci]` に変更し、Conventional Commits に準拠。
 
-- **`index.js`**:
-    - HTML の生成先および画像の保存先パスを `./public/` 以下に変更します。
-- **`src/imageProcessor.js`**:
-    - フォールバック画像 (`public/assets/fallback.png`) の参照パスを修正します。
+### [4. アセットの統合]
+- プロジェクトロゴとフォールバック画像を `dist/assets/` に追加し、プログラムおよびテンプレートから参照するように修正。
 
-### [3. GitHub Actions の修正]
-
-- **`.github/workflows/weekly_icebreak.yml`**:
-    - デプロイ対象 (pages artifact) のパスを `./docs` から `./public` へ変更します。
-    - 生成物のコミット対象も `./public/` 以下に変更します。
-
-### [4. 管理設定の更新]
-
-- **`.gitignore`**: `public/output/` を除外対象に更新します。
-
-## 検証計画
-
-- **デプロイ設定の確認**: ワークフローの記述が正しく `./public` を指しているか確認。
-- **ローカル実行確認**: `node index.js` を実行し、ファイルが `public/` 以下に正しく生成・配置されることを確認。
+## 検証結果
+- **Git Sync**: リモートリポジトリとの同期（Rebase & Push）を確認済み。
+- **設定整合性**: 全てのパスとファイル名が `icebreak-email` 基準で統一されていることを確認済み。
