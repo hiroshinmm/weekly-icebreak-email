@@ -31,13 +31,13 @@ async function processNewsImages(topics, outputDir) {
         const page = await browser.newPage();
         // Set User-Agent to avoid blocking
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-        await page.setViewport({ width: 800, height: 100 });
+        await page.setViewport({ width: 600, height: 100 });
 
         const htmlContent = `
         <!DOCTYPE html>
         <html>
         <body style="margin: 0; padding: 0;">
-            <img id="news-img" src="${topic.imageUrl}" style="width: 800px; height: auto; display: block;">
+            <img id="news-img" src="${topic.imageUrl}" style="width: 600px; height: auto; display: block;">
         </body>
         </html>
         `;

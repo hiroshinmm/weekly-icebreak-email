@@ -18,8 +18,8 @@ function generateEmailTemplate(topics, pageUrl) {
 
                 <!-- Image Section -->
                 ${(t.link !== '#' && !t.title.includes('今週の最新ニュースはありませんでした')) ? `
-                <div style="width: 100%; overflow: hidden; background-color: #ffffff; text-align: center; line-height: 0; margin-top: 0;">
-                    <a href="${t.link}" style="display: block; width: 100%;">
+                <div style="width: 100%; overflow: hidden; background-color: #ffffff; text-align: center; padding: 0 32px; box-sizing: border-box; margin-top: 0;">
+                    <a href="${t.link}" style="display: block; width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0;">
                         <img src="cid:news_image_${i}" alt="${t.title}" style="width: 100%; display: block;">
                     </a>
                 </div>
@@ -156,8 +156,8 @@ function generateIndexHtml(topics) {
             ${topics.map((t, i) => `
             <article class="card">
                 ${(t.link !== '#' && !t.title.includes('今週の最新ニュースはありませんでした')) ? `
-                <div class="img-container">
-                    <a href="${t.link}" target="_blank" style="display: block; width: 100%; height: 100%;">
+                <div class="img-container" style="padding: 0 40px; box-sizing: border-box;">
+                    <a href="${t.link}" target="_blank" style="display: block; width: 100%; height: 100%; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;">
                         <img src="${t.imageUrl ? `output/news_image_${i}.png` : `assets/fallback.png`}" alt="${t.title}" loading="lazy">
                     </a>
                 </div>
