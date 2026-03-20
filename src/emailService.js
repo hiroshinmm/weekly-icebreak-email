@@ -20,7 +20,7 @@ async function sendEmail({ user, pass, to, subject, text, html, attachments }) {
         attachments: attachments.map(a => ({
             filename: a.filename,
             path: a.path,
-            cid: a.filename
+            cid: a.cid || a.filename
         }))
     });
 
