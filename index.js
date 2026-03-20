@@ -56,15 +56,7 @@ async function main() {
         const subject = `[Icebreak Email] 最新テックネタ ${topics.length}選`;
         const text = `今週のトレンドニュースを抽出しました。\n\nWebで見る:\n${pageUrl}`;
 
-        // ロゴをアタッチメントに追加
-        const logoPath = path.join(__dirname, 'dist', 'assets', 'logo.png');
-        if (fs.existsSync(logoPath)) {
-            attachments.push({
-                path: logoPath,
-                filename: 'logo.png',
-                cid: 'logo'
-            });
-        }
+        // メールの送信
 
         await sendEmail({
             user: emailUser,
