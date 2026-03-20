@@ -9,6 +9,7 @@ function generateEmailTemplate(topics, pageUrl) {
         ${topics.map((t, i) => {
         const attachmentName = `news_image_${i}.png`;
         return `
+            <div style="margin-bottom: 60px; width: 600px; max-width: 600px; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
                 <!-- Title Section -->
                 <div style="padding: 32px 32px 8px 32px;">
                     <h2 style="margin: 0; font-size: 22px; line-height: 1.4; font-weight: 700;">
@@ -18,9 +19,9 @@ function generateEmailTemplate(topics, pageUrl) {
 
                 <!-- Image Section -->
                 ${(t.link !== '#' && !t.title.includes('今週の最新ニュースはありませんでした')) ? `
-                <div style="width: 100%; overflow: hidden; background-color: #ffffff; text-align: center; padding: 0 32px; box-sizing: border-box; margin-top: 0;">
-                    <a href="${t.link}" style="display: block; width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0;">
-                        <img src="cid:news_image_${i}" alt="${t.title}" style="width: 100%; display: block;">
+                <div style="margin: 0 32px; background-color: #ffffff; text-align: center; overflow: hidden; margin-top: 0;">
+                    <a href="${t.link}" style="display: block; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0;">
+                        <img src="cid:news_image_${i}" alt="${t.title}" style="width: 100%; max-width: 100%; display: block;">
                     </a>
                 </div>
                 ` : ''}
