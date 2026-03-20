@@ -15,8 +15,21 @@ async function fetchOgImage(articleUrl) {
             headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
         });
         const $ = cheerio.load(res.data);
-        const ogImage = $('meta[property="og:image"]').attr('content')
+        let ogImage = $('meta[property="og:image"]').attr('content')
             || $('meta[name="twitter:image"]').attr('content');
+        
+        // フォールバック: メタタグがない場合、記事内の最初の大きそうな画像を探す
+        if (!ogImage) {
+            const possibleImgs = $('article img, .post-content img, .entry-content img, main img').toArray();
+            for (const img of possibleImgs) {
+                const src = $(img).attr('src');
+                if (src && src.match(/^https?:\/\//i) && !src.includes('avatar') && !src.includes('profile')) {
+                    ogImage = src;
+                    break;
+                }
+            }
+        }
+
         if (ogImage && ogImage.match(/^https?:\/\//i)) {
             return ogImage;
         }

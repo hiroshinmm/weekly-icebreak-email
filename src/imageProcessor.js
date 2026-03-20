@@ -7,7 +7,12 @@ async function processNewsImages(topics, outputDir) {
     console.log('Launching browser for image processing...');
     const browser = await puppeteer.launch({
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || (process.platform === 'linux' ? '/usr/bin/google-chrome' : undefined),
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu'
+        ]
     });
 
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
@@ -24,8 +29,8 @@ async function processNewsImages(topics, outputDir) {
         <html>
         <body style="margin: 0; padding: 0; background-color: #f8fafc; overflow: hidden;">
             ${topic.imageUrl ? `
-            <div style="width: 600px; height: 338px; position: relative; background: #fff;">
-                <img id="news-img" src="${topic.imageUrl}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; document.getElementById('fallback').style.display='flex';">
+            <div style="width: 600px; height: 338px; position: relative; background: #f8fafc; display: flex; justify-content: center; align-items: center;">
+                <img id="news-img" src="${topic.imageUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.style.display='none'; document.getElementById('fallback').style.display='flex';">
                 <div id="fallback" style="display: none; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; color: #94a3b8; font-family: sans-serif;">
                     <span style="font-size: 80px; margin-bottom: 10px;">📰</span>
                     <span style="font-size: 18px; font-weight: bold;">No Image Available</span>
