@@ -7,14 +7,14 @@ const { sendEmail } = require('./src/emailService');
 const { generateEmailTemplate, generateIndexHtml } = require('./src/templateGenerator');
 
 async function main() {
-    const configPath = path.join(__dirname, 'config.json');
+    const configPath = path.join(__dirname, 'config', 'config.json');
     const config = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath)) : {};
     
     // APIキーの取得
     const geminiApiKey = process.env.GEMINI_API_KEY || config.gemini_api_key;
     
     // ニュースソースの読み込み
-    const sourcesPath = path.join(__dirname, 'sources.json');
+    const sourcesPath = path.join(__dirname, 'config', 'sources.json');
     let sources = [];
     if (fs.existsSync(sourcesPath)) {
         sources = JSON.parse(fs.readFileSync(sourcesPath));
@@ -34,14 +34,14 @@ async function main() {
     }));
 
     // 3. 画像のリサイズ・保存
-    const outputDir = path.join(__dirname, 'docs', 'output');
+    const outputDir = path.join(__dirname, 'dist', 'output');
     const attachments = await processNewsImages(topics, outputDir);
 
-    // 4. Webページ (docs/index.html) の生成
-    const docsDir = path.join(__dirname, 'docs');
+    // 4. Webページ (dist/index.html) の生成
+    const distDir = path.join(__dirname, 'dist');
     const indexHtml = generateIndexHtml(topics);
-    fs.writeFileSync(path.join(docsDir, 'index.html'), indexHtml);
-    console.log('docs/index.html generated successfully.');
+    fs.writeFileSync(path.join(distDir, 'index.html'), indexHtml);
+    console.log('dist/index.html generated successfully.');
 
     // 5. メール送信
     if (topics.length > 0) {
@@ -55,6 +55,16 @@ async function main() {
         const htmlBody = generateEmailTemplate(topics, pageUrl);
         const subject = `[Weekly Ice Break] 最新テックネタ ${topics.length}選`;
         const text = `今週のトレンドニュースを抽出しました。\n\nWebで見る:\n${pageUrl}`;
+
+        // ロゴをアタッチメントに追加
+        const logoPath = path.join(__dirname, 'dist', 'assets', 'logo.png');
+        if (fs.existsSync(logoPath)) {
+            attachments.push({
+                path: logoPath,
+                filename: 'logo.png',
+                cid: 'logo'
+            });
+        }
 
         await sendEmail({
             user: emailUser,

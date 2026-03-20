@@ -21,6 +21,12 @@ async function processNewsImages(topics, outputDir) {
         const isDummy = topic.link === '#' || topic.title.includes('今週の最新ニュースはありませんでした');
         if (isDummy) return null;
 
+        // 画像URLがない場合は共通のフォールバックアセットを使用
+        if (!topic.imageUrl) {
+            const fallbackPath = path.join(__dirname, '..', 'dist', 'assets', 'fallback.png');
+            return { path: fallbackPath, filename: 'fallback.png', cid: `no_image_${index}` };
+        }
+
         console.log(`Processing image ${index}: ${topic.tag}...`);
         const page = await browser.newPage();
         // Set User-Agent to avoid blocking
@@ -31,39 +37,28 @@ async function processNewsImages(topics, outputDir) {
         <!DOCTYPE html>
         <html>
         <body style="margin: 0; padding: 0; background-color: #f8fafc; overflow: hidden;">
-            ${topic.imageUrl ? `
             <div style="width: 600px; height: 338px; position: relative; background: #f8fafc; display: flex; justify-content: center; align-items: center;">
-                <img id="news-img" src="${topic.imageUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.style.display='none'; document.getElementById('fallback').style.display='flex';">
-                <div id="fallback" style="display: none; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; color: #94a3b8; font-family: sans-serif;">
-                    <span style="font-size: 80px; margin-bottom: 10px;">📰</span>
-                    <span style="font-size: 18px; font-weight: bold;">No Image Available</span>
-                </div>
+                <img id="news-img" src="${topic.imageUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
             </div>
-            ` : `
-            <div style="width: 600px; height: 338px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f1f5f9; color: #94a3b8; font-family: sans-serif;">
-                <span style="font-size: 80px; margin-bottom: 10px;">📰</span>
-                <span style="font-size: 18px; font-weight: bold;">No Image Available</span>
-            </div>
-            `}
         </body>
         </html>
         `;
 
         await page.setContent(htmlContent, { waitUntil: 'networkidle2' });
         
-        // Wait specifically for images to load if imageUrl is present
-        if (topic.imageUrl) {
-            try {
-                await page.waitForFunction(() => {
-                    const img = document.getElementById('news-img');
-                    return img && img.complete && img.naturalHeight !== 0;
-                }, { timeout: 10000 });
-            } catch (e) {
-                console.log(`Warning: Image ${index} might not have loaded correctly.`);
-            }
+        try {
+            await page.waitForFunction(() => {
+                const img = document.getElementById('news-img');
+                return img && img.complete && img.naturalHeight !== 0;
+            }, { timeout: 10000 });
+        } catch (e) {
+            console.log(`Warning: Image ${index} might not have loaded correctly. Using fallback.`);
+            const fallbackPath = path.join(__dirname, '..', 'dist', 'assets', 'fallback.png');
+            await page.close();
+            return { path: fallbackPath, filename: 'fallback.png', cid: `no_image_${index}` };
         }
 
-        const fileName = topic.imageUrl ? `news_image_${index}.png` : `no_image_available_${index}.png`;
+        const fileName = `news_image_${index}.png`;
         const outputPath = path.join(outputDir, fileName);
 
         await page.screenshot({ path: outputPath });

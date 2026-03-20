@@ -2,6 +2,7 @@ function generateEmailTemplate(topics, pageUrl) {
     return `
     <div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #1e293b; max-width: 600px; margin: 0 auto; background-color: #f8fafc; padding: 40px 20px;">
         <header style="text-align: center; margin-bottom: 40px;">
+            <img src="cid:logo" alt="Weekly Ice Break Logo" style="width: 80px; height: 80px; margin-bottom: 20px;">
             <h1 style="color: #003399; margin: 0; font-size: 28px; letter-spacing: -0.5px;">Weekly Ice Break</h1>
             <p style="color: #64748b; font-size: 14px; margin-top: 8px;">エンジニアのための最新テックトレンド</p>
         </header>
@@ -21,7 +22,7 @@ function generateEmailTemplate(topics, pageUrl) {
                 ${(t.link !== '#' && !t.title.includes('今週の最新ニュースはありませんでした')) ? `
                 <div style="width: 100%; overflow: hidden; background-color: #f8fafc; text-align: center;">
                     <a href="${t.link}" style="display: block; width: 100%;">
-                        <img src="cid:${t.imageUrl ? `news_image_${i}.png` : `no_image_available_${i}.png`}" alt="${t.title}" style="width: 100%; display: block;">
+                        <img src="cid:${t.imageUrl ? `news_image_${i}.png` : `no_image_${i}`}" alt="${t.title}" style="width: 100%; display: block;">
                     </a>
                 </div>
                 ` : ''}
@@ -74,9 +75,9 @@ function generateIndexHtml(topics) {
                 background: var(--bg);
                 color: var(--text-main);
                 line-height: 1.6;
-                padding: 40px 20px;
             }
             header { text-align: center; padding: 60px 0; max-width: 800px; margin: 0 auto; }
+            .header-logo { width: 120px; height: 120px; margin-bottom: 30px; }
             h1 { font-size: 3rem; font-weight: 900; color: var(--accent); letter-spacing: -0.02em; margin-bottom: 12px; }
             header p { font-size: 1.1rem; color: var(--text-muted); }
 
@@ -151,6 +152,7 @@ function generateIndexHtml(topics) {
     </head>
     <body>
         <header>
+            <img src="assets/logo.png" alt="Weekly Ice Break Logo" class="header-logo">
             <h1>Weekly Ice Break</h1>
             <p>エンジニアのための最新テックトレンド</p>
         </header>
@@ -163,7 +165,7 @@ function generateIndexHtml(topics) {
                 ${(t.link !== '#' && !t.title.includes('今週の最新ニュースはありませんでした')) ? `
                 <div class="img-container">
                     <a href="${t.link}" target="_blank" style="display: block; width: 100%; height: 100%;">
-                        <img src="output/${t.imageUrl ? `news_image_${i}.png` : `no_image_available_${i}.png`}" alt="${t.title}" loading="lazy">
+                        <img src="${t.imageUrl ? `output/news_image_${i}.png` : `assets/fallback.png`}" alt="${t.title}" loading="lazy">
                     </a>
                 </div>
                 ` : ''}
