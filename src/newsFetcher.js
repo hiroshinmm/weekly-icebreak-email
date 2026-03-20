@@ -45,7 +45,6 @@ async function fetchOgImage(articleUrl) {
 // ニューストピックス取得メイン関数
 async function fetchTopics(sources) {
     console.log('Fetching topics from multiple sources...');
-    const allTopics = [];
     const now = new Date();
     const tenDaysAgo = new Date(now.getTime() - (10 * 24 * 60 * 60 * 1000));
 
