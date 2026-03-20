@@ -23,7 +23,10 @@ async function fetchOgImage(articleUrl) {
             const possibleImgs = $('article img, .post-content img, .entry-content img, main img').toArray();
             for (const img of possibleImgs) {
                 const src = $(img).attr('src');
-                if (src && src.match(/^https?:\/\//i) && !src.includes('avatar') && !src.includes('profile')) {
+                const alt = $(img).attr('alt') || '';
+                const isIcon = src && (src.includes('avatar') || src.includes('profile') || src.match(/favicon|logo|icon|v\.svg|vg_logo/i));
+                
+                if (src && src.match(/^https?:\/\//i) && !isIcon) {
                     ogImage = src;
                     break;
                 }

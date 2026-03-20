@@ -18,13 +18,13 @@ function generateEmailTemplate(topics, pageUrl) {
                 </div>
                 
                 <!-- Image Section -->
-                <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; background-color: #f1f5f9; position: relative;">
+                ${t.imageUrl ? `
+                <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; background-color: #f8fafc; text-align: center;">
                     <a href="${t.link}" style="display: block; width: 100%; height: 100%;">
-                        <!-- Blurred Background for small/wide images -->
-                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('cid:${attachmentName}'); background-size: cover; background-position: center; filter: blur(20px); opacity: 0.3;"></div>
-                        <img src="cid:${attachmentName}" alt="${t.title}" style="position: relative; width: 100%; height: 100%; display: block; object-fit: contain;">
+                        <img src="cid:${attachmentName}" alt="${t.title}" style="max-width: 100%; max-height: 100%; display: inline-block; object-fit: contain;">
                     </a>
                 </div>
+                ` : ''}
                 
                 <!-- Content Section -->
                 <div style="padding: 24px 32px 32px 32px;">
@@ -160,13 +160,13 @@ function generateIndexHtml(topics) {
                 <div class="card-header">
                     <h2 class="card-title"><a href="${t.link}" target="_blank">${t.title}</a></h2>
                 </div>
+                ${t.imageUrl ? `
                 <div class="img-container">
-                    <a href="${t.link}" target="_blank" style="display: block; width: 100%; height: 100%; position: relative;">
-                        <!-- Blurred background effect -->
-                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('output/news_image_${i}.png'); background-size: cover; background-position: center; filter: blur(15px); opacity: 0.3; transform: scale(1.1);"></div>
-                        <img src="output/news_image_${i}.png" alt="${t.title}" loading="lazy" style="position: relative; z-index: 1;">
+                    <a href="${t.link}" target="_blank" style="display: block; width: 100%; height: 100%;">
+                        <img src="output/news_image_${i}.png" alt="${t.title}" loading="lazy">
                     </a>
                 </div>
+                ` : ''}
                 <div class="card-body">
                     <div class="tag">${t.tag}</div>
                     <p class="card-snippet">${t.snippet}</p>
