@@ -64,6 +64,8 @@ async function fetchTopics(sources) {
                         let imageUrl = null;
                         const possibleImageLocations = [
                             item.enclosure?.url,
+                            item['media:group']?.['media:thumbnail']?.[0]?.url,
+                            item['media:thumbnail']?.url,
                             item.content?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
                             item['content:encoded']?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
                             item.description?.match(/<img[^>]+src="([^">]+)"/i)?.[1],
@@ -73,10 +75,21 @@ async function fetchTopics(sources) {
 
                         for (const url of possibleImageLocations) {
                             if (url && url.match(/^https?:\/\//i)) {
-                                if (url.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i) || url.includes('/image') || url.includes('/img') || url.includes('cdn') || url.includes('media')) {
+                                if (url.match(/\.(jpeg|jpg|gif|png|webp|bmp)(\?.*)?$/i) || 
+                                    url.includes('/image') || url.includes('/img') || 
+                                    url.includes('cdn') || url.includes('media') || 
+                                    url.includes('ytimg')) {
                                     imageUrl = url;
                                     break;
                                 }
+                            }
+                        }
+
+                        // YouTube URL から直接サムネイルを推測するフォールバック
+                        if (!imageUrl && item.link && item.link.includes('youtube.com/watch')) {
+                            const videoId = item.link.match(/v=([^&]+)/)?.[1];
+                            if (videoId) {
+                                imageUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
                             }
                         }
 
