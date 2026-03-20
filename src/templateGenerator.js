@@ -18,7 +18,7 @@ function generateEmailTemplate(topics, pageUrl) {
                 </div>
                 
                 <!-- Image Section -->
-                ${t.imageUrl ? `
+                ${(t.link !== '#' && !t.title.includes('今週の最新ニュースはありませんでした')) ? `
                 <div style="width: 100%; overflow: hidden; background-color: #f8fafc; text-align: center;">
                     <a href="${t.link}" style="display: block; width: 100%;">
                         <img src="cid:news_image_${i}.png" alt="${t.title}" style="width: 100%; display: block;">
@@ -160,7 +160,7 @@ function generateIndexHtml(topics) {
                 <div class="card-header">
                     <h2 class="card-title"><a href="${t.link}" target="_blank">${t.title}</a></h2>
                 </div>
-                ${t.imageUrl ? `
+                ${(t.link !== '#' && !t.title.includes('今週の最新ニュースはありませんでした')) ? `
                 <div class="img-container">
                     <a href="${t.link}" target="_blank" style="display: block; width: 100%; height: 100%;">
                         <img src="output/news_image_${i}.png" alt="${t.title}" loading="lazy">
