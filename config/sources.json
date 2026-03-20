@@ -1,0 +1,131 @@
+[
+    {
+        "category": "SonyAlpha/Imaging",
+        "urls": [
+            "https://www.sonyalpharumors.com/feed/",
+            "https://dc.watch.impress.co.jp/data/rss/1.0/dcw/feed.rdf",
+            "https://digicame-info.com/rss.xml",
+            "https://rss.itmedia.co.jp/rss/2.0/camera.xml"
+        ],
+        "keywords": [
+            "sony",
+            "alpha",
+            "lens",
+            "camera",
+            "sensor",
+            "ソニー",
+            "カメラ",
+            "レンズ",
+            "α7",
+            "α9",
+            "α1",
+            "VLOGCAM"
+        ]
+    },
+    {
+        "category": "Display/TFT",
+        "urls": [
+            "https://www.tftcentral.co.uk/feed",
+            "https://www.theverge.com/rss/tech/monitors/index.xml",
+            "https://rss.itmedia.co.jp/rss/2.0/pcuser.xml",
+            "https://ascii.jp/rss.xml"
+        ],
+        "keywords": [
+            "monitor",
+            "display",
+            "panel",
+            "tft",
+            "oled",
+            "led",
+            "hz",
+            "resolutions",
+            "モニター",
+            "ディスプレイ",
+            "液晶",
+            "有機EL",
+            "4K",
+            "リフレッシュレート"
+        ]
+    },
+    {
+        "category": "XR/Spatial",
+        "urls": [
+            "https://www.theverge.com/rss/vr-virtual-reality/index.xml",
+            "https://www.moguravr.com/feed/",
+            "https://uploadvr.com/feed/",
+            "https://panora.tokyo/feed/",
+            "https://shiropen.com/feed/"
+        ],
+        "keywords": [
+            "vr",
+            "ar",
+            "mr",
+            "xr",
+            "vision pro",
+            "meta quest",
+            "headset",
+            "spatial",
+            "メタバース",
+            "仮想現実",
+            "拡張現実",
+            "空間演算",
+            "HMD"
+        ]
+    },
+    {
+        "category": "Gaming/Hardware",
+        "urls": [
+            "https://www.4gamer.net/rss/index.xml",
+            "https://pc.watch.impress.co.jp/data/rss/1.0/pcw/feed.rdf",
+            "https://rss.itmedia.co.jp/rss/2.0/pcuser.xml",
+            "https://www.techpowerup.com/rss/news",
+            "https://www.theverge.com/rss/gaming/index.xml"
+        ],
+        "keywords": [
+            "monitor",
+            "display",
+            "gpu",
+            "rtx",
+            "radeon",
+            "oled",
+            "gaming pc",
+            "controller",
+            "keyboard",
+            "mouse",
+            "ゲーミングモニター",
+            "ディスプレイ",
+            "グラフィックボード",
+            "グラボ",
+            "ゲーミングPC",
+            "デバイス",
+            "周辺機器"
+        ]
+    },
+    {
+        "category": "AI/Software",
+        "urls": [
+            "https://zenn.dev/feed",
+            "https://rss.itmedia.co.jp/rss/2.0/aiplus.xml",
+            "https://www.publickey1.jp/atom.xml",
+            "https://wired.jp/feed/rss",
+            "https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml"
+        ],
+        "keywords": [
+            "ai",
+            "llm",
+            "gpt",
+            "openai",
+            "claude",
+            "gemini",
+            "developer",
+            "software",
+            "人工知能",
+            "生成AI",
+            "機械学習",
+            "copilot",
+            "ChatGPT",
+            "プログラミング",
+            "開発"
+        ]
+    }
+]
